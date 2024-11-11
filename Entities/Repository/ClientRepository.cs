@@ -22,6 +22,10 @@ namespace Domain.Repository
         {
             return clients;
         }
+        public Client GetByName(string name)
+        {
+            return clients.FirstOrDefault(client => client.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
 
     }  
 }

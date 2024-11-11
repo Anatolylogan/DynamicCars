@@ -17,14 +17,22 @@ namespace Domain.UseCase
         {
             storeRepository = storeRepo;
         }
-      
+
         public StoreService(Store store)
         {
             this.store = store;
         }
         public void SendTOStore(Order order) //Метод для  отправки заказа на склад
         {
-            store.Orders.Add(order);
+            if (order == null)
+            {
+                Console.WriteLine("Невозможно отправить заказ на склад, так как заказ не существует.");
+                return;
+            }
+            if (order.MatChoices == null)
+            {
+                order.MatChoices = new List<(string color, string carBrand)>();
+            }
             order.Status = "На складе";
         }
     }

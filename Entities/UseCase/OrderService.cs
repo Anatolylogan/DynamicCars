@@ -31,9 +31,11 @@ namespace Domain.UseCase
                 Client = client,
                 ClientId = client.ClientId,
                 Mats = mats,
+                MatChoices = matChoices ?? new List<(string color, string carBrand)>(),
                 Status = "Создан"
             };
             client.Orders.Add(order);
+            orderRepository.Add(order);
             return order;
         }
     }
