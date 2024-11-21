@@ -8,6 +8,7 @@ namespace Domain.Entities
 {
     public class Order
     {
+        private static int _idCounter = 0;
         public int OrderID { get; set; }
         public List<Mat> Mats { get; set; } = new List<Mat>();
         public int ClientId { get; set; }

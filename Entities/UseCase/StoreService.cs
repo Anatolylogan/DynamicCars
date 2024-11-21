@@ -10,18 +10,6 @@ namespace Domain.UseCase
 {
     public class StoreService
     {
-        private readonly StoreRepository storeRepository;
-        private Store store;
-
-        public StoreService(StoreRepository storeRepo)
-        {
-            storeRepository = storeRepo;
-        }
-
-        public StoreService(Store store)
-        {
-            this.store = store;
-        }
         public void SendTOStore(Order order) //Метод для  отправки заказа на склад
         {
             if (order == null)

@@ -9,7 +9,7 @@ namespace Domain.Entities
 {
     public class Delivery
     {
-        public static int nextDeliveryId = 1;
+        private static int _idCounter = 0;
         public int DeliveryId { get; set; }
         public string Address { get; set; }
         public Order Order { get; set; }

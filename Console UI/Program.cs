@@ -1,41 +1,47 @@
-﻿using Domain.Entities;
+﻿
+using Domain.Entities;
 using Domain.Repository;
 using Domain.UseCase;
-using Domain;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
-class Program
+public class ConsoleUi
 {
-    static ClientRepository clientRepository = new ClientRepository();
-    static OrderRepository orderRepository = new OrderRepository();
-    static MakerRepository makerRepository = new MakerRepository();
-    static StoreRepository storeRepository = new StoreRepository();
-    static DeliveryRepository deliveryRepository = new DeliveryRepository();
-    static ManagerRepository managerRepository = new ManagerRepository();
+    private readonly ClientRepository _clientRepository;
+    private readonly OrderRepository _orderRepository;
+    private readonly MakerRepository _makerRepository;
+    private readonly StoreRepository _storeRepository;
+    private readonly DeliveryRepository _deliveryRepository;
 
-    static OrderService orderService = new OrderService(orderRepository, clientRepository);
-    static ManagerService managerService = new ManagerService(orderRepository, makerRepository, managerRepository);
-    static MakerService makerService = new MakerService(orderRepository);
-    static StoreService storeService = new StoreService(storeRepository);
-    static DeliveryService deliveryService = new DeliveryService(deliveryRepository, orderRepository);
-    static OrderProcessManager processManager = new OrderProcessManager(
-        orderService, managerService, makerService, storeService, deliveryService);
-    static Client currentClient;
-    static Manager currentManager;
-    static List<(string color, string carBrand)> matChoices = new List<(string, string)>(); 
+    private readonly RegisterClientUseCase _registerClientUseCase;
+    private readonly CreateOrderUseCase _createOrderUseCase;
+    private readonly StoreService storeService;
 
-    static void Main()
+    public ConsoleUi()
     {
-        bool exit = false;
-        while (!exit)
+        _clientRepository = new ClientRepository();
+        _orderRepository = new OrderRepository();
+        _makerRepository = new MakerRepository();
+        _storeRepository = new StoreRepository();
+        _deliveryRepository = new DeliveryRepository();
+        _registerClientUseCase = new RegisterClientUseCase(_clientRepository);
+        _createOrderUseCase = new CreateOrderUseCase(_orderRepository, _clientRepository);
+        _storeRepository = new StoreRepository();
+    }
+
+    public void Run()
+    {
+        while (true)
         {
-            Console.WriteLine("=== Добро пожаловать в Dynamic Cars ===");
-            Console.WriteLine("1. Меню клиента");
-            Console.WriteLine("2. Меню менеджера");
-            Console.WriteLine("3. Выход");
+            Console.WriteLine("Главное меню:");
+            Console.WriteLine("1. Клиент");
+            Console.WriteLine("2. Менеджер");
+            Console.WriteLine("0. Выход");
             Console.Write("Выберите пункт: ");
-            var choice = Console.ReadLine();
+            string choice = Console.ReadLine();
+
             switch (choice)
             {
                 case "1":
@@ -44,29 +50,27 @@ class Program
                 case "2":
                     ShowManagerMenu();
                     break;
-                case "3":
-                    exit = true;
-                    break;
+                case "0":
+                    return;
                 default:
-                    Console.WriteLine("Неверный выбор. Повторите попытку.");
+                    Console.WriteLine("Неверный выбор.");
                     break;
             }
         }
     }
-    static void ShowClientMenu()
+    private void ShowClientMenu()
     {
-        bool back = false;
-        while (!back)
+        while (true)
         {
-            Console.Clear();
-            Console.WriteLine("=== Меню клиента ===");
+            Console.WriteLine("Меню клиента:");
             Console.WriteLine("1. Зарегистрироваться");
             Console.WriteLine("2. Войти");
             Console.WriteLine("3. Сделать заказ");
             Console.WriteLine("4. Отменить заказ");
-            Console.WriteLine("5. Назад");
+            Console.WriteLine("0. Назад");
             Console.Write("Выберите пункт: ");
-            var choice = Console.ReadLine();
+            string choice = Console.ReadLine();
+
             switch (choice)
             {
                 case "1":
@@ -81,242 +85,299 @@ class Program
                 case "4":
                     CancelOrder();
                     break;
-                case "5":
-                    back = true;
-                    break;
+                case "0":
+                    return;
                 default:
-                    Console.WriteLine("Неверный выбор. Повторите попытку.");
+                    Console.WriteLine("Неверный выбор.");
                     break;
             }
         }
     }
-    static void RegisterClient()
+    private void ShowManagerMenu()
     {
-        Console.Write("Введите имя клиента: ");
-        string name = Console.ReadLine();
-        currentClient = new Client { ClientId = new Random().Next(1, 1000), Name = name };
-        clientRepository.Add(currentClient);
-        Console.WriteLine("Клиент успешно зарегистрирован. Нажмите любую клавишу для возврата.");
-        Console.ReadKey();
-    }
-    static void LoginClient()
-    {
-        Console.Write("Введите имя клиента: ");
-        string name = Console.ReadLine();
-        currentClient = clientRepository.GetByName(name);
-        Console.WriteLine(currentClient != null ? "Вход выполнен. Нажмите любую клавишу для возврата. " : "Клиент не найден. Нажмите любую клавишу для возврата.");
-        Console.ReadKey();
-    }
-    static void MakeOrder()
-    {
-        if (currentClient == null)
+        while (true)
         {
-            Console.WriteLine("Пожалуйста, войдите в систему. Нажмите любую клавишу для возврата.");
-            Console.ReadKey();
-            return;
-        }
-        Console.Write("Введите цвет EVA коврика: ");
-        string color = Console.ReadLine();
-        Console.Write("Введите марку автомобиля: ");
-        string carBrand = Console.ReadLine();
-        matChoices.Add((color, carBrand));
-        Order order = orderService.CreateOrder(currentClient, matChoices);
-        orderRepository.Add(order);
-        Console.WriteLine("Заказ успешно создан. Нажмите любую клавишу для возврата.");
-        Console.ReadKey();
-    }
-    static void CancelOrder()
-    {
-        Console.Write("Введите ID заказа для отмены: ");
-        int id = int.Parse(Console.ReadLine());
-        Order order = orderRepository.GetById(id);
-        if (order != null && order.Client == currentClient)
-        {
-            order.Status = "Отменен";
-            orderRepository.Update(order);
-            Console.WriteLine("Заказ успешно отменен.");
-        }
-        else
-        {
-            Console.WriteLine("Заказ не найден или доступ запрещен.");
-        }
-        Console.ReadKey();
-    }
-    static void ShowManagerMenu()
-    {
-        bool back = false;
-        while (!back)
-        {
-            Console.Clear();
-            Console.WriteLine("=== Меню менеджера ===");
-            Console.WriteLine("1. Зарегистрироваться как менеджер");
-            Console.WriteLine("2. Войти как менеджер");
-            Console.WriteLine("3. Список заказов");
-            Console.WriteLine("4. Назначить заказ на изготовителя");
-            Console.WriteLine("5. Изменить статус заказа на выполнено");
-            Console.WriteLine("6. Отправить заказ на склад");
-            Console.WriteLine("7. Отправить заказ на доставку");
-            Console.WriteLine("8. Назад");
+            Console.WriteLine("Меню менеджера:");
+            Console.WriteLine("1. Список заказов");
+            Console.WriteLine("2. Назначить заказ на исполнителя");
+            Console.WriteLine("3. Изменить статус заказа на выполнено");
+            Console.WriteLine("4. Отправить заказ на склад");
+            Console.WriteLine("5. Отправить заказ на доставку");
+            Console.WriteLine("0. Назад");
             Console.Write("Выберите пункт: ");
-            var choice = Console.ReadLine();
+            string choice = Console.ReadLine();
 
             switch (choice)
             {
                 case "1":
-                    RegisterManager();
+                    ShowOrders();
                     break;
                 case "2":
-                    LoginManager();
+                    AssignMaker();
                     break;
                 case "3":
-                    ListOrders();
+                    MarkOrderAsCompleted();
                     break;
                 case "4":
-                    AssignMakerToOrder();
-                    break;
-                case "5":
-                    SetOrderAsCompleted();
-                    break;
-                case "6":
                     SendOrderToStore();
                     break;
-                case "7":
-                    SendOrderForDelivery();
+                case "5":
+                    SendOrderToDelivery();
                     break;
-                case "8":
-                    back = true;
-                    break;
+                case "0":
+                    return;
                 default:
-                    Console.WriteLine("Неверный выбор. Повторите попытку.");
+                    Console.WriteLine("Неверный выбор.");
                     break;
             }
         }
     }
-    static void RegisterManager()
+
+    private void RegisterClient()
     {
-        Console.Write("Введите имя менеджера: ");
+        Console.Write("Введите имя клиента: ");
         string name = Console.ReadLine();
-        currentManager = new Manager { ManagerId = new Random().Next(1, 1000), Name = name };
-        managerRepository.Add(currentManager);
-        Console.WriteLine("Менеджер успешно зарегистрирован. Нажмите любую клавишу для возврата.");
-        Console.ReadKey();
+        var client = _registerClientUseCase.Execute(name);
+        Console.WriteLine($"Клиент зарегистрирован. ID: {client.ClientId}, Имя: {client.Name}");
     }
-    static void LoginManager()
-    {
-        Console.Write("Введите имя менеджера: ");
-        string name = Console.ReadLine();
-        currentManager = managerRepository.GetByName(name);
-        Console.WriteLine(currentManager != null ? "Вход выполнен." : "Менеджер не найден.");
-        Console.ReadKey();
-    }
-    static void ListOrders()
-    {
-        Console.Clear();
-        Console.WriteLine("=== Список заказов ===");
 
-        var orders = orderRepository.GetAll();
-        if (orders.Any())
+    private void LoginClient()
+    {
+        Console.Write("Введите ID клиента: ");
+        if (int.TryParse(Console.ReadLine(), out int clientId))
         {
-            foreach (var order in orders)
+            var client = _clientRepository.GetById(clientId);
+            if (client != null)
             {
-                Console.WriteLine($"ID заказа: {order.OrderID}, Статус: {order.Status}, ID клиента: {order.ClientId}");
-                Console.WriteLine("Выбор EVA ковриков:");
-
-                foreach (var mat in order.MatChoices)
-                {
-                    Console.WriteLine($" - Цвет: {mat.color}, Марка автомобиля: {mat.carBrand}");
-                }
-                Console.WriteLine();
-            }
-        }
-        else
-        {
-            Console.WriteLine("Заказы отсутствуют.");
-        }
-
-        Console.ReadKey();
-    }
-    static void AssignMakerToOrder()
-    {
-        Console.Write("Введите ID заказа для назначения изготовителя: ");
-        int orderId = int.Parse(Console.ReadLine());
-        Order order = orderRepository.GetById(orderId);
-
-        Console.Write("Введите имя изготовителя: ");
-        string makerName = Console.ReadLine();
-        Maker maker = new Maker { MakerId = new Random().Next(1, 1000), Name = makerName };
-        makerRepository.Add(maker);
-
-        if (order != null)
-        {
-            managerService.AssignMaker(order, maker);
-            Console.WriteLine("Изготовитель успешно назначен. Нажмите любую клавишу для возврата.");
-        }
-        else
-        {
-            Console.WriteLine("Заказ не найден. Нажмите любую клавишу для возврата.");
-        }
-        Console.ReadKey();
-    }
-    static void SetOrderAsCompleted()
-    {
-        Console.Write("Введите ID заказа для завершения: ");
-        int orderId = int.Parse(Console.ReadLine());
-        Order order = orderRepository.GetById(orderId);
-
-        if (order != null)
-        {
-            makerService.CompleteMaking(order);
-            Console.WriteLine("Заказ успешно выполнен. Нажмите любую клавишу для возврата.");
-        }
-        else
-        {
-            Console.WriteLine("Заказ не найден. Нажмите любую клавишу для возврата.");
-        }
-        Console.ReadKey();
-    }
-    static void SendOrderToStore()
-    {
-        Console.Write("Введите ID заказа для отправки на склад: ");
-        if (int.TryParse(Console.ReadLine(), out int orderId))
-        {
-            Order order = orderRepository.GetById(orderId);
-
-            if (order == null)
-            {
-                Console.WriteLine("Заказ не найден. Нажмите любую клавишу для возврата.");
+                Console.WriteLine($"Добро пожаловать, {client.Name}!");
             }
             else
             {
-                storeService.SendTOStore(order); 
-                Console.WriteLine("Заказ успешно отправлен на склад. Нажмите любую клавишу для возврата.");
+                Console.WriteLine("Клиент с таким ID не найден.");
             }
         }
         else
         {
-            Console.WriteLine("Некорректный ввод. Введите числовой ID. Нажмите любую клавишу для возврата.");
+            Console.WriteLine("ID должен быть числом.");
         }
-        Console.ReadKey();
     }
-
-    static void SendOrderForDelivery()
+    private void MakeOrder()
     {
-        Console.Write("Введите ID заказа для отправки на доставку: ");
-        int orderId = int.Parse(Console.ReadLine());
-        Order order = orderRepository.GetById(orderId);
-
-        Console.Write("Введите адрес доставки: ");
-        string deliveryAddress = Console.ReadLine();
-
-        if (order != null)
+        Console.Write("Введите ID клиента: ");
+        if (!int.TryParse(Console.ReadLine(), out int clientId))
         {
-            deliveryService.SendToDelivery(order, deliveryAddress);
-            Console.WriteLine("Заказ успешно отправлен на доставкую. Нажмите любую клавишу для возврата.");
+            Console.WriteLine("ID должен быть числом.");
+            return;
+        }
+
+        var client = _clientRepository.GetById(clientId);
+        if (client == null)
+        {
+            Console.WriteLine("Клиент с таким ID не найден.");
+            return;
+        }
+
+        Console.WriteLine("Введите информацию о ковриках (цвет и марка автомобиля).");
+        var mats = new List<(string color, string carBrand)>();
+        while (true)
+        {
+            Console.Write("Цвет коврика (или пусто для завершения): ");
+            string color = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(color)) break;
+
+            Console.Write("Марка автомобиля: ");
+            string carBrand = Console.ReadLine();
+
+            mats.Add((color, carBrand));
+        }
+
+        if (mats.Any())
+        {
+            var order = _createOrderUseCase.Execute(clientId, mats);
+            Console.WriteLine($"Заказ создан. ID: {order.OrderID}, Статус: {order.Status}");
         }
         else
         {
-            Console.WriteLine("Заказ не найден. Нажмите любую клавишу для возврата.");
+            Console.WriteLine("Заказ не создан. Не указаны коврики.");
         }
-        Console.ReadKey();
+    }
+    private void CancelOrder()
+    {
+        Console.Write("Введите ID заказа для отмены: ");
+        if (int.TryParse(Console.ReadLine(), out int orderId))
+        {
+            var order = _orderRepository.GetById(orderId);
+            if (order != null)
+            {
+                _orderRepository.GetAll().Remove(order);
+                Console.WriteLine($"Заказ с ID {orderId} отменён.");
+            }
+            else
+            {
+                Console.WriteLine("Заказ с таким ID не найден.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("ID должен быть числом.");
+        }
+    }
+    private void ShowOrders()
+    {
+        var orders = _orderRepository.GetAll();
+        if (orders.Any())
+        {
+            Console.WriteLine("Список заказов:");
+            foreach (var order in orders)
+            {
+                Console.WriteLine($"ID: {order.OrderID}, Статус: {order.Status}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Нет заказов.");
+        }
+    }
+    private void AssignMaker()
+    {
+        Console.Write("Введите ID заказа: ");
+        if (!int.TryParse(Console.ReadLine(), out int orderId))
+        {
+            Console.WriteLine("ID заказа должен быть числом.");
+            return;
+        }
+
+        var order = _orderRepository.GetById(orderId);
+        if (order == null)
+        {
+            Console.WriteLine("Заказ с таким ID не найден.");
+            return;
+        }
+
+        Console.Write("Введите ID изготовителя: ");
+        if (!int.TryParse(Console.ReadLine(), out int makerId))
+        {
+            Console.WriteLine("ID изготовителя должен быть числом.");
+            return;
+        }
+
+        var maker = _makerRepository.GetById(makerId);
+        if (maker == null)
+        {
+            Console.WriteLine("Изготовитель с таким ID не найден.");
+            return;
+        }
+
+        order.Maker = maker;
+        order.Status = "Assigned to maker";
+        _orderRepository.Update(order);
+
+        Console.WriteLine($"Изготовитель с ID {makerId} назначен на заказ {orderId}. Статус заказа обновлён: {order.Status}");
+    }
+    private void MarkOrderAsCompleted()
+    {
+        Console.Write("Введите ID заказа: ");
+        if (!int.TryParse(Console.ReadLine(), out int orderId))
+        {
+            Console.WriteLine("ID заказа должен быть числом.");
+            return;
+        }
+
+        var order = _orderRepository.GetById(orderId);
+        if (order == null)
+        {
+            Console.WriteLine("Заказ с таким ID не найден.");
+            return;
+        }
+
+        if (order.Status != "Assigned to maker")
+        {
+            Console.WriteLine("Заказ не может быть выполнен, так как изготовитель не назначен.");
+            return;
+        }
+
+        order.Status = "Made";
+        _orderRepository.Update(order);
+
+        Console.WriteLine($"Заказ с ID {orderId} выполнен. Статус обновлён: {order.Status}");
+    }
+    private void SendOrderToDelivery()
+    {
+        Console.Write("Введите ID заказа: ");
+        if (!int.TryParse(Console.ReadLine(), out int orderId))
+        {
+            Console.WriteLine("ID заказа должен быть числом.");
+            return;
+        }
+
+        var order = _orderRepository.GetById(orderId);
+        if (order == null)
+        {
+            Console.WriteLine("Заказ с таким ID не найден.");
+            return;
+        }
+
+        if (order.Status != "Made")
+        {
+            Console.WriteLine("Заказ должен быть выполнен перед отправкой на доставку.");
+            return;
+        }
+
+        Console.Write("Введите адрес доставки: ");
+        string address = Console.ReadLine();
+
+        var delivery = new Delivery
+        {
+            Order = order,
+            Address = address
+        };
+
+        order.Status = "Sent for delivery";
+        _deliveryRepository.Add(delivery);
+        _orderRepository.Update(order);
+
+        Console.WriteLine($"Заказ с ID {orderId} отправлен на доставку по адресу: {address}. Статус обновлён: {order.Status}");
+    }
+    public void SendOrderToStore()
+    {
+        Console.WriteLine("\n=== Отправка заказа на склад ===");
+
+
+        var orders = _orderRepository.GetAll();
+        if (!orders.Any())
+        {
+            Console.WriteLine("Нет доступных заказов.");
+            return;
+        }
+
+        Console.WriteLine("Доступные заказы:");
+        foreach (var order in orders)
+        {
+            Console.WriteLine($"ID: {order.OrderID}, Клиент: {order.Client.Name}, Статус: {order.Status}");
+        }
+        Console.Write("Введите ID заказа для отправки на склад: ");
+        if (int.TryParse(Console.ReadLine(), out int orderId))
+        {
+            var order = _orderRepository.GetById(orderId);
+
+            if (order == null)
+            {
+                Console.WriteLine("Заказ с таким ID не найден.");
+                return;
+            }
+
+            if (order.Status != "Made")
+            {
+                Console.WriteLine("Только заказы со статусом 'Made' могут быть отправлены на склад.");
+                return;
+            }
+            _storeService.SendToStore(order);
+            Console.WriteLine($"Заказ ID: {order.OrderID} успешно отправлен на склад.");
+        }
+        else
+        {
+            Console.WriteLine("Неверный ввод ID заказа.");
+        }
     }
 }
+

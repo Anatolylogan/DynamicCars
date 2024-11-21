@@ -8,7 +8,7 @@ namespace Domain.Entities
 {
     public class Maker
     {
-        public static int nextMakerId = 1;
+        private static int _idCounter = 0;
         public int MakerId { get; set; }
         public string Name { get; set; }
         public string Status { get; set; }
