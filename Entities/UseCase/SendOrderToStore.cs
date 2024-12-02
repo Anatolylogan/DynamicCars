@@ -8,7 +8,7 @@ namespace Domain.UseCase
         private readonly StoreService storeService;
         private readonly OrderRepository orderRepository;
 
-        public SendOrderToStore (StoreService storeService, OrderRepository orderRepository)
+        public SendOrderToStore(StoreService storeService, OrderRepository orderRepository)
         {
             this.storeService = storeService;
             this.orderRepository = orderRepository;
@@ -16,11 +16,18 @@ namespace Domain.UseCase
 
         public void Execute(int orderId)
         {
-            Order order = orderRepository.GetById(orderId);
-            if (order == null)
-                throw new Exception("Заказ не найден.");
+            var orders = orderRepository.GetAll();
+            if (!orders.Any())
+            {
+                Console.WriteLine("Нет доступных заказов.");
+                return;
+            }
 
-            storeService.SendTOStore(order);
+            Console.WriteLine("Доступные заказы:");
+            foreach (var order in orders)
+            {
+                Console.WriteLine($"ID: {order.OrderID}, Клиент: {order.Client.Name}, Статус: {order.Status}");
+            }
         }
     }
 }

@@ -1,42 +1,55 @@
 ﻿using Domain.Entities;
 using Domain.Repository;
 
-namespace Domain.UseCase
-{
-    public class CreateOrderUseCase
+    namespace Domain.UseCase
     {
-        private readonly OrderRepository _orderRepository;
-        private readonly ClientRepository _clientRepository;
-
-        public CreateOrderUseCase(OrderRepository orderRepository, ClientRepository clientRepository)
+        public class CreateOrderUseCase
         {
-            _orderRepository = orderRepository;
-            _clientRepository = clientRepository;
-        }
+            private readonly OrderRepository _orderRepository;
+            private readonly ClientRepository _clientRepository;
+            private readonly IdGenerator _idGenerator;
 
-        public Order Execute(int clientId, List<(string color, string carBrand)> matChoices)
-        {
-            var client = _clientRepository.GetById(clientId);
-            if (client == null)
+            public CreateOrderUseCase(OrderRepository orderRepository, ClientRepository clientRepository, IdGenerator idGenerator)
             {
-                throw new Exception("Клиент не найден");
+                _orderRepository = orderRepository;
+                _clientRepository = clientRepository;
+                _idGenerator = idGenerator;
             }
-            var mats = matChoices.Select(choice => new Mat
-            {
-                Color = choice.color,
-                CarBrand = choice.carBrand
-            }).ToList();
 
-            var order = new Order
+            public void Execute(int clientId, List<(string color, string carBrand)> matChoices)
             {
-                Client = client,
-                ClientId = client.ClientId,
-                Mats = mats,
-                Status = "Создан"
-            };
+               
+                var client = _clientRepository.GetById(clientId);
+                if (client == null)
+                {
+                    Console.WriteLine("Клиент с таким ID не найден.");
+                    return;
+                }
 
-            _orderRepository.Add(order);
-            return order;
+               
+                var order = new Order
+                {
+                    OrderID = _idGenerator.GenerateId(),
+                    ClientId = client.ClientId,
+                    Client = client,
+                    Status = "Создан", 
+                    MatChoices = matChoices
+                };
+
+                foreach (var matChoice in matChoices)
+                {
+                    var mat = new Mat
+                    {
+                        Color = matChoice.color,
+                        CarBrand = matChoice.carBrand
+                    };
+                    order.Mats.Add(mat);
+                }
+
+       
+                _orderRepository.Add(order);
+
+                Console.WriteLine($"Заказ с ID {order.OrderID} успешно создан для клиента {client.Name}.");
+            }
         }
     }
-}

@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.UseCase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,23 +10,33 @@ namespace Domain.Repository
 {
     public class ClientRepository
     {
-        private readonly List<Client> clients = new List<Client> ();
-        public void Add(Client client) //Добавление клиента
+        private readonly List<Client> clients = new List<Client>();
+        private readonly IdGenerator _idGenerator;
+
+        public ClientRepository(IdGenerator idGenerator)
         {
-            clients.Add (client);
+            _idGenerator = idGenerator;
         }
-        public Client GetById(int id) //Получение клинт по ид
+
+        public void Add(Client client)
+        {
+            client.ClientId = _idGenerator.GenerateId();  
+            clients.Add(client);
+        }
+
+        public Client GetById(int id)
         {
             return clients.FirstOrDefault(c => c.ClientId == id);
         }
-        public List<Client> GetAll()// Все клиенты
+
+        public List<Client> GetAll()
         {
             return clients;
         }
+
         public Client GetByName(string name)
         {
             return clients.FirstOrDefault(client => client.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
-
-    }  
+    }
 }

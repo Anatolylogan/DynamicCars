@@ -15,7 +15,7 @@ namespace Domain.UseCase
             _makerRepository = makerRepository;
         }
 
-        public void Execute(int orderId, string makerName)
+        public void Execute(int orderId, int makerId)
         {
             var order = _orderRepository.GetById(orderId);
             if (order == null)
@@ -26,7 +26,7 @@ namespace Domain.UseCase
             var maker = new Maker
             {
                 MakerId = new Random().Next(1, 1000),
-                Name = makerName
+                
             };
 
             _makerRepository.Add(maker);

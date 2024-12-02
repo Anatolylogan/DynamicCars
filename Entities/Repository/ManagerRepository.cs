@@ -4,26 +4,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-namespace Domain.Repository
-{
-    public class ManagerRepository
+    namespace Domain.Repository
     {
-        private List<Manager> managers = new List<Manager>();
-
-
-        public void Add(Manager manager)
+        public interface IManagerRepository
         {
-            managers.Add(manager);
+            Manager Add(Manager manager);
+            Manager GetByName(string name);
+            List<Manager> GetAll();
         }
-        public Manager GetByName(string name)
+
+        public class ManagerRepository : IManagerRepository
         {
-            return managers.FirstOrDefault(manager => manager.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-        }
-        public List<Manager> GetAll()
-        {
-            return managers;
+            private readonly List<Manager> _managers = new List<Manager>();
+            private static int _nextId = 1;
+
+            public Manager Add(Manager manager)
+            {
+                manager.ManagerId = _nextId++;
+                _managers.Add(manager);
+                return manager;
+            }
+
+            public Manager GetByName(string name)
+            {
+                return _managers.Find(m => m.Name == name);
+            }
+
+            public List<Manager> GetAll()
+            {
+                return _managers;
+            }
         }
     }
-
-}

@@ -14,12 +14,14 @@ namespace Domain.UseCase
 
         public Client Execute(string clientName)
         {
-            var client = new Client
+            if (string.IsNullOrWhiteSpace(clientName))
             {
-                Name = clientName
-            };
+                throw new ArgumentException("Имя клиента не может быть пустым.");
+            }
 
+            var client = new Client { Name = clientName };
             _clientRepository.Add(client);
+
             return client;
         }
     }

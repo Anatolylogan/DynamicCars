@@ -2,6 +2,7 @@
 using Domain.Repository;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,26 +18,42 @@ namespace Domain.UseCase
             orderRepository = orderRepo;
             clientRepository = clientRepo;
         }
-        public Order CreateOrder(Client client, List<(string color, string carBrand)> matChoices) //Метод для создание заказа. Принимает данные клиента и ковриков
+        //public Order CreateOrder(Client client, List<(string color, string carBrand)> matChoices) //Метод для создание заказа. Принимает данные клиента и ковриков
+       // {
+///List<Mat> mats = new List<Mat>();
+          //  int matId = 1;
+           // foreach (var choice in matChoices)
+///{
+               // mats.Add(new Mat(choice.color, choice.carBrand));
+           // }
+           // Order order = new Order
+            //{
+            //    Client = client,
+            //   ClientId = client.ClientId,
+             //   Mats = mats,
+///MatChoices = matChoices ?? new List<(string color, string carBrand)>(),
+             //   Status = "Создан"
+           // };
+           // client.Orders.Add(order);
+           // orderRepository.Add(order);
+            //return order
+      //  }
+        
+        public void GetAll()
         {
-            List<Mat> mats = new List<Mat>();
-            int matId = 1;
-            foreach (var choice in matChoices)
+            var orders = orderRepository.GetAll();
+            if (orders.Any())
             {
-                mats.Add(new Mat(matId++, choice.color, choice.carBrand));
+                Console.WriteLine("Список заказов:");
+                foreach (var order in orders)
+                {
+                    Console.WriteLine($"ID: {order.OrderID}, Статус: {order.Status}");
+                }
             }
-
-            Order order = new Order
+            else
             {
-                Client = client,
-                ClientId = client.ClientId,
-                Mats = mats,
-                MatChoices = matChoices ?? new List<(string color, string carBrand)>(),
-                Status = "Создан"
-            };
-            client.Orders.Add(order);
-            orderRepository.Add(order);
-            return order;
+                Console.WriteLine("Нет заказов.");
+            }
         }
     }
 }
