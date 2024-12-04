@@ -11,7 +11,8 @@ namespace Domain.UseCase
 {
     public class RegisterManagerUseCase
     {
-        private readonly IManagerRepository _managerRepository;
+        private readonly ManagerRepository _managerRepository;
+
         public RegisterManagerUseCase(ManagerRepository managerRepository)
         {
             _managerRepository = managerRepository;
@@ -19,8 +20,7 @@ namespace Domain.UseCase
 
         public Manager Execute(string managerName)
         {
-          
-            if (string.IsNullOrEmpty(managerName))
+            if (string.IsNullOrWhiteSpace(managerName))
             {
                 throw new ArgumentException("Имя менеджера не может быть пустым.");
             }
@@ -30,8 +30,10 @@ namespace Domain.UseCase
                 throw new InvalidOperationException("Менеджер с таким именем уже существует.");
             }
 
-            var manager = new Manager();
-            return _managerRepository.Add(manager);
+            var manager = new Manager { Name = managerName };
+            _managerRepository.Add(manager);
+
+            return manager;
         }
     }
 }

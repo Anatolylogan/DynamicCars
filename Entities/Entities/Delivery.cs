@@ -11,6 +11,7 @@ namespace Domain.Entities
     {
         private static int _idCounter = 0;
         public int DeliveryId { get; set; }
+        public int OrderId {  get; set; }
         public string Address { get; set; }
         public Order Order { get; set; }
     }

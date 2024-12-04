@@ -8,35 +8,37 @@ using System.Threading.Tasks;
 
 namespace Domain.UseCase
 {
-    public class SendToDeliveryUseCase
+    namespace Domain.UseCase
     {
-        private readonly OrderRepository _orderRepository;
-        private readonly DeliveryRepository _deliveryRepository;
-
-        public SendToDeliveryUseCase(OrderRepository orderRepository, DeliveryRepository deliveryRepository)
+        public class SendToDeliveryUseCase
         {
-            _orderRepository = orderRepository;
-            _deliveryRepository = deliveryRepository;
-        }
+            private readonly OrderRepository _orderRepository;
+            private readonly DeliveryRepository _deliveryRepository;
 
-        public void Execute(int orderId, string address)
-        {
-            var order = _orderRepository.GetById(orderId);
-            if (order == null)
+            public SendToDeliveryUseCase(OrderRepository orderRepository, DeliveryRepository deliveryRepository)
             {
-                throw new Exception("Заказ не найден");
+                _orderRepository = orderRepository;
+                _deliveryRepository = deliveryRepository;
             }
 
-            var delivery = new Delivery
+            public void Execute(int orderId, string address)
             {
-                DeliveryId = new Random().Next(1, 1000),
-                Address = address,
-                Order = order
-            };
+                var order = _orderRepository.GetByOrderId(orderId);
+                if (order == null)
+                {
+                    throw new Exception("Заказ не найден");
+                }
+                var delivery = new Delivery
+                {
+                    OrderId = order.OrderID, 
+                    Address = address
+                };
+                _deliveryRepository.Add(delivery);
+                order.Status = "На доставке";
+                _orderRepository.Update(order, o => o.OrderID == order.OrderID);
 
-            _deliveryRepository.Add(delivery);
-            order.Status = "На доставке";
-            _orderRepository.Update(order);
+                Console.WriteLine($"Заказ с ID {order.OrderID} отправлен на доставку.");
+            }
         }
     }
 }

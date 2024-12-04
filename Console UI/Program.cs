@@ -1,7 +1,9 @@
 ﻿
 using Domain.Entities;
 using Domain.Repository;
+using Domain.Repository.Domain.Repository;
 using Domain.UseCase;
+using Domain.UseCase.Domain.UseCase;
 
 namespace ConsoleApp
 {
@@ -9,14 +11,20 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
+            string ordersFilePath = "orders.json";
+            string clientsFilePath = "clients.json";
+            string makersFilePath = "makers.json";
+            string deliveriesFilePath = "deliveries.json";
+            string managersFilePath = "managers.json";
+
             IdGenerator idGenerator = new IdGenerator();
 
-            var clientRepository = new ClientRepository(idGenerator);
-            var makerRepository = new MakerRepository();
-            var orderRepository = new OrderRepository();
+            var clientRepository = new ClientRepository(clientsFilePath);
+            var makerRepository = new MakerRepository(makersFilePath); 
+            var orderRepository = new OrderRepository(ordersFilePath);
             var storeRepository = new StoreRepository();
-            var deliveryRepository = new DeliveryRepository();
-            var managerRepository = new ManagerRepository();
+            var deliveryRepository = new DeliveryRepository(deliveriesFilePath); 
+            var managerRepository = new ManagerRepository(managersFilePath);
 
             var createOrderUseCase = new CreateOrderUseCase(orderRepository, clientRepository, idGenerator);
             var registerClientUseCase = new RegisterClientUseCase(clientRepository);
@@ -24,7 +32,6 @@ namespace ConsoleApp
             var assignMakerToOrderUseCase = new AssignMakerToOrderUseCase(orderRepository, makerRepository);
             var cancelOrderUseCase = new CancelOrderUseCase(orderRepository);
             var completeMakingUseCase = new CompleteMakingUseCase(orderRepository);
-            var deliveryService = new DeliveryService(deliveryRepository, orderRepository);
             var sendToStoreUseCase = new SendToStoreUseCase(orderRepository, storeRepository);
             var sendToDeliveryUseCase = new SendToDeliveryUseCase(orderRepository, deliveryRepository);
             var managerService = new ManagerService(orderRepository, makerRepository, managerRepository);
@@ -100,6 +107,7 @@ namespace ConsoleApp
                 }
             }
         }
+
         static void RegisterClient(RegisterClientUseCase registerClientUseCase)
         {
             Console.Write("Введите имя клиента: ");
@@ -133,7 +141,7 @@ namespace ConsoleApp
             string carBrand = Console.ReadLine();
             Console.Write("Введите цвет ковров: ");
             string carpetColor = Console.ReadLine();
-            createOrderUseCase.Execute(orderClientId, new List<(string color, string carBrand)>()
+            createOrderUseCase.Execute(orderClientId, new List<(string color, string carBrand)>
             {
                 (carpetColor, carBrand)
             });
@@ -152,6 +160,7 @@ namespace ConsoleApp
             Console.WriteLine($"Заказ с ID {cancelOrderId} отменен.");
             Console.ReadKey();
         }
+
         static void ShowManagerMenu(ManagerRepository managerRepository, CreateOrderUseCase createOrderUseCase, AssignMakerToOrderUseCase assignMakerToOrderUseCase, CompleteMakingUseCase completeMakingUseCase, SendToStoreUseCase sendToStoreUseCase, SendToDeliveryUseCase sendToDeliveryUseCase, RegisterManagerUseCase registerManagerUseCase, OrderRepository orderRepository)
         {
             bool exitManagerMenu = false;
@@ -206,7 +215,7 @@ namespace ConsoleApp
 
         static void RegisterManager(RegisterManagerUseCase registerManagerUseCase)
         {
-            Console.Write("Введите имя менеджера для регистрации: ");
+            Console.Write("Введите имя менеджера: ");
             string managerName = Console.ReadLine();
             var manager = registerManagerUseCase.Execute(managerName);
             Console.WriteLine($"Менеджер {manager.Name} успешно зарегистрирован с ID {manager.ManagerId}");
@@ -215,12 +224,12 @@ namespace ConsoleApp
 
         static void LoginManager(ManagerRepository managerRepository)
         {
-            Console.Write("Введите имя менеджера для входа: ");
-            string managerName = Console.ReadLine();
-            var manager = managerRepository.GetByName(managerName);
+            Console.Write("Введите Имя менеджера: ");
+            string Name = Console.ReadLine();
+            var manager = managerRepository.GetByName(Name);
             if (manager != null)
             {
-                Console.WriteLine($"Менеджер {manager.Name} вошел в систему.");
+                Console.WriteLine($"Менеджер {Name} вошёл в систему.");
             }
             else
             {
@@ -234,19 +243,19 @@ namespace ConsoleApp
             var orders = orderRepository.GetAll();
             foreach (var order in orders)
             {
-                Console.WriteLine($"Заказ  Статус: {order.Status}");
+                Console.WriteLine($"ID: {order.OrderID}, Клиент: {order.ClientId}, Статус: {order.Status}");
             }
             Console.ReadKey();
         }
 
         static void AssignOrderToMaker(AssignMakerToOrderUseCase assignMakerToOrderUseCase)
         {
-            Console.Write("Введите ID заказа для назначения на изготовителя: ");
+            Console.Write("Введите ID заказа для назначения изготовителя: ");
             int orderId = int.Parse(Console.ReadLine());
-            Console.Write("Введите ID изготовителя: ");
-            int makerId = int.Parse(Console.ReadLine());
-            assignMakerToOrderUseCase.Execute(orderId, makerId);
-            Console.WriteLine($"Заказ с ID {orderId} назначен на изготовителя с ID {makerId}");
+            Console.Write("Введите Имя изготовителя: ");
+            string Name = Console.ReadLine();
+            assignMakerToOrderUseCase.Execute(orderId, Name);
+            Console.WriteLine($"Заказ с ID {orderId} назначен на изготовителя {Name}");
             Console.ReadKey();
         }
 
@@ -272,10 +281,10 @@ namespace ConsoleApp
         {
             Console.Write("Введите ID заказа для отправки на доставку: ");
             int orderId = int.Parse(Console.ReadLine());
-            Console.WriteLine("Введите адресс для доставки:");
+            Console.WriteLine("Введите адрес для доставки:");
             var address = Console.ReadLine();
             sendToDeliveryUseCase.Execute(orderId, address);
-            Console.WriteLine($"Заказ с ID {orderId} отправлен на доставку по адрессу {address}");
+            Console.WriteLine($"Заказ с ID {orderId} отправлен на доставку по адресу {address}");
             Console.ReadKey();
         }
     }

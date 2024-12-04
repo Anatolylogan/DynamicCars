@@ -7,20 +7,14 @@ using System.Threading.Tasks;
 
 namespace Domain.Repository
 {
-    public class MakerRepository
+    public class MakerRepository : BaseRepository<Maker>
     {
-        private readonly List<Maker> makers = new List<Maker>();
-        public void Add(Maker maker)//Добавление изготовителя
+        public MakerRepository(string filePath) : base(filePath) { }
+
+        public Maker GetByName(string name)
         {
-            makers.Add(maker);
-        }
-        public Maker GetById(int id)
-        {
-            return makers.FirstOrDefault(m => m.MakerId == id);
-        }
-        public List<Maker> GetAll()
-        {
-            return makers;
+            return Items.Find(maker => maker.Name == name);
         }
     }
+
 }

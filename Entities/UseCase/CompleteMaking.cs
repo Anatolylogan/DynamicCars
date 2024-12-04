@@ -18,14 +18,14 @@ namespace Domain.UseCase
 
         public void Execute(int orderId)
         {
-            var order = _orderRepository.GetById(orderId);
+            var order = _orderRepository.GetByOrderId(orderId);
             if (order == null)
             {
                 throw new Exception("Заказ не найден");
             }
-
             order.Status = "Выполнен";
-            _orderRepository.Update(order);
+            _orderRepository.Update(order, o => o.OrderID == orderId); 
         }
     }
 }
+

@@ -14,7 +14,12 @@ namespace Domain.UseCase
 
         public Client Execute(int clientId)
         {
-            return _clientRepository.GetById(clientId);
+            var client = _clientRepository.GetById(clientId);
+            if (client == null)
+            {
+                throw new Exception("Клиент не найден");
+            }
+            return client;
         }
     }
 }

@@ -6,33 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
     namespace Domain.Repository
     {
-        public interface IManagerRepository
+    public class ManagerRepository : BaseRepository<Manager>
+    {
+        public ManagerRepository(string filePath) : base(filePath) { }
+
+        public Manager GetByName(string name)
         {
-            Manager Add(Manager manager);
-            Manager GetByName(string name);
-            List<Manager> GetAll();
-        }
-
-        public class ManagerRepository : IManagerRepository
-        {
-            private readonly List<Manager> _managers = new List<Manager>();
-            private static int _nextId = 1;
-
-            public Manager Add(Manager manager)
-            {
-                manager.ManagerId = _nextId++;
-                _managers.Add(manager);
-                return manager;
-            }
-
-            public Manager GetByName(string name)
-            {
-                return _managers.Find(m => m.Name == name);
-            }
-
-            public List<Manager> GetAll()
-            {
-                return _managers;
-            }
+            return Items.Find(manager => manager.Name == name);
         }
     }
+
+}

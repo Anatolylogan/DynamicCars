@@ -15,25 +15,22 @@ namespace Domain.UseCase
             _makerRepository = makerRepository;
         }
 
-        public void Execute(int orderId, int makerId)
-        {
-            var order = _orderRepository.GetById(orderId);
+        public void Execute(int orderId, string Name)
+        { 
+            var order = _orderRepository.GetByOrderId(orderId);
             if (order == null)
             {
                 throw new Exception("Заказ не найден");
             }
-
-            var maker = new Maker
+            var maker = _makerRepository.GetByName(Name);
+            if (maker == null)
             {
-                MakerId = new Random().Next(1, 1000),
-                
-            };
-
-            _makerRepository.Add(maker);
+                throw new Exception("Изготовитель не найден");
+            }
             order.Maker = maker;
             order.MakerId = maker.MakerId;
             order.Status = "Назначен изготовитель";
-            _orderRepository.Update(order);
+            _orderRepository.Update(order, o => o.OrderID == orderId); 
         }
     }
 }

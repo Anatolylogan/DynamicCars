@@ -1,37 +1,39 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Domain.Entities;
+using Domain.UseCase;
 
-namespace Domain.Repository
+public class OrderRepository : BaseRepository<Order>, IOrderRepository
 {
-    public class OrderRepository
+    public OrderRepository(string filePath) : base(filePath) { }
+
+    public Order GetByOrderId(int orderId)
     {
-        private readonly List<Order> orders = new List<Order>();
-        public void Add(Order order)//Добавление заказа
+        return Items.Find(order => order.OrderID == orderId);
+    }
+
+    public IEnumerable<Order> GetByClientId(int clientId)
+    {
+        return Items.Where(order => order.ClientId == clientId);
+    }
+
+    public IEnumerable<Order> GetByMakerId(int makerId)
+    {
+        return Items.Where(order => order.MakerId == makerId);
+    }
+    public void Update(Order order)
+    {
+        var existingOrder = GetByOrderId(order.OrderID);
+        if (existingOrder != null)
         {
-            orders.Add(order);
+            existingOrder.Status = order.Status;
+            existingOrder.ClientId = order.ClientId;
+            existingOrder.MakerId = order.MakerId;
         }
-        public Order GetById(int id)
-        {
-            return orders.FirstOrDefault(o => o.OrderID == id);
-        }
-        public List<Order> GetAll()//Все заказы
-        {
-            return orders;
-        }
-        public void Update(Order order)//Обновление заказа
-        {
-            var existingOrder = GetById(order.OrderID);
-            if (existingOrder != null)
-            {
-                existingOrder.Mats = order.Mats;
-                existingOrder.Client = order.Client;
-                existingOrder.Maker = order.Maker;
-                existingOrder.Status = order.Status;
-            }
-        }
+    }
+    public void Delete(Order order)
+    {
+        Items.Remove(order); 
     }
 }

@@ -6,31 +6,45 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.UseCase
-{
-    public class DeliveryService
-    {
-        private readonly DeliveryRepository deliveryRepository;
-        private readonly OrderRepository orderRepository;
-        public DeliveryService(DeliveryRepository deliveryRepo, OrderRepository orderRepo)
-        {
-            deliveryRepository = deliveryRepo;
-            orderRepository = orderRepo;
-        }
+//public class DeliveryService
+//{
+//    private readonly DeliveryRepository _deliveryRepository;
+//    private readonly OrderRepository _orderRepository;
 
-        public void SendToDelivery(Order order, string address) // Метод для отправки товара на доставку
-        {
-            order.Status = "Отправлен на доставку";
-            Delivery delivery = new Delivery()
-            {
-                Order = order,
-                Address = address
-            };
-        }
-        public void CompleteDelivery(Order order) // Метод для завершение доставки
-        {
-            order.Status = "Доставлен";
-        }
-    }
+//    public DeliveryService(DeliveryRepository deliveryRepository, OrderRepository orderRepository)
+//    {
+//        _deliveryRepository = deliveryRepository;
+//        _orderRepository = orderRepository;
+//    }
 
-}
+//    public void SendToDelivery(int orderId, string address)
+//    {
+//        var order = _orderRepository.GetByOrderId(orderId);
+//        if (order == null)
+//        {
+//            throw new Exception("Заказ не найден");
+//        }
+
+//        var delivery = new Delivery
+//        {
+//            OrderId = orderId,
+//            Address = address
+//        };
+
+//        _deliveryRepository.Add(delivery);
+//        order.Status = "Отправлен на доставку";
+//        _orderRepository.Update(order);
+//    }
+
+//    public void CompleteDelivery(int orderId)
+//    {
+//        var order = _orderRepository.GetByOrderId(orderId);
+//        if (order == null)
+//        {
+//            throw new Exception("Заказ не найден");
+//        }
+
+//        order.Status = "Доставлен";
+//        _orderRepository.Update(order);
+//    }
+//}

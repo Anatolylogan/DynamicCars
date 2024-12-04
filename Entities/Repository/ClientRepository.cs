@@ -8,35 +8,17 @@ using System.Threading.Tasks;
 
 namespace Domain.Repository
 {
-    public class ClientRepository
+    public class ClientRepository : BaseRepository<Client>
     {
-        private readonly List<Client> clients = new List<Client>();
-        private readonly IdGenerator _idGenerator;
-
-        public ClientRepository(IdGenerator idGenerator)
+        public ClientRepository(string filePath) : base(filePath) { }
+        public Client GetById(int clientId)
         {
-            _idGenerator = idGenerator;
+            return Items.FirstOrDefault(client => client.ClientId == clientId);
         }
-
-        public void Add(Client client)
+        public Client GetByPhoneNumber(string phoneNumber)
         {
-            client.ClientId = _idGenerator.GenerateId();  
-            clients.Add(client);
-        }
-
-        public Client GetById(int id)
-        {
-            return clients.FirstOrDefault(c => c.ClientId == id);
-        }
-
-        public List<Client> GetAll()
-        {
-            return clients;
-        }
-
-        public Client GetByName(string name)
-        {
-            return clients.FirstOrDefault(client => client.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            return Items.FirstOrDefault(client => client.PhoneNumber == phoneNumber);
         }
     }
+
 }
