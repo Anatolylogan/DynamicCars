@@ -1,10 +1,6 @@
 ﻿using Domain.Entities;
-using Domain.Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Infrastructure.Repository;
+
 
 namespace Domain.UseCase
 {
@@ -17,7 +13,7 @@ namespace Domain.UseCase
         }
         public void CompleteMaking(Order order) //Метод для заверние изготовление
         {
-            order.Status = "Изготовлен";
+            order.Status = OrderStatus.Completed;
         }
     }
 }

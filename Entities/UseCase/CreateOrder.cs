@@ -1,5 +1,5 @@
 ﻿using Domain.Entities;
-using Domain.Repository;
+using Infrastructure.Repository;
 using Domain.UseCase;
 
 public class CreateOrderUseCase
@@ -7,7 +7,7 @@ public class CreateOrderUseCase
     private readonly OrderRepository _orderRepository;
     private readonly ClientRepository _clientRepository;
     private readonly IdGenerator _idGenerator;
-
+    public LogHandler Logger { get; set; } 
     public CreateOrderUseCase(OrderRepository orderRepository, ClientRepository clientRepository, IdGenerator idGenerator)
     {
         _orderRepository = orderRepository;
@@ -20,22 +20,23 @@ public class CreateOrderUseCase
         var client = _clientRepository.GetById(clientId);
         if (client == null)
         {
-            throw new Exception("Клиент не найден");
+            Logger?.Invoke($"Ошибка: клиент с ID {clientId} не найден.");
+            throw new Exception("Клиент не найден.");
         }
 
-        var order = new Order
+        foreach (var choice in matChoices)
         {
-            OrderID = _idGenerator.GenerateId(),
-            ClientId = client.ClientId,
-            Status = "Создан",
-            Mats = matChoices.Select(choice => new Mat
+            var order = new Order
             {
-                Color = choice.color,
-                CarBrand = choice.carBrand
-            }).ToList()
-        };
+                Id = _idGenerator.GenerateId(),
+                ClientId = clientId,
+                Status = OrderStatus.New,
+                CarBrand = choice.carBrand,
+                CarpetColor = choice.color
+            };
+            _orderRepository.Add(order);
 
-        _orderRepository.Add(order);
-        Console.WriteLine($"Заказ с ID {order.OrderID} успешно создан для клиента {client.Name}.");
+            Logger?.Invoke($"Создан заказ: ID {order.Id}, клиент {clientId}, автомобиль {choice.carBrand}, цвет {choice.color}");
+        }
     }
 }

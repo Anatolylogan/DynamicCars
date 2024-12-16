@@ -1,10 +1,5 @@
 ﻿using Domain.Entities;
-using Domain.Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Infrastructure.Repository;
 
 namespace Domain.UseCase
 {
@@ -23,8 +18,8 @@ namespace Domain.UseCase
         public void AssignMaker(Order order, Maker maker) //Метод для назанчение Maker на заказ
         {
             order.Maker = maker;
-            order.MakerId = maker.MakerId;
-            order.Status = "Назначаен изготовителю";
+            order.MakerId = maker.Id;
+            order.Status = OrderStatus.InProgress;
         }
     }
 }

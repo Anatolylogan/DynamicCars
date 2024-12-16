@@ -1,39 +1,23 @@
-﻿
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Domain.Entities;
-using Domain.UseCase;
+﻿using Domain.Entities;
 
-public class OrderRepository : BaseRepository<Order>, IOrderRepository
+namespace Infrastructure.Repository
 {
-    public OrderRepository(string filePath) : base(filePath) { }
+    public class OrderRepository : BaseRepository<Order>
+    {
+        public OrderRepository(string filePath) : base(filePath) { }
 
-    public Order GetByOrderId(int orderId)
-    {
-        return Items.Find(order => order.OrderID == orderId);
-    }
-
-    public IEnumerable<Order> GetByClientId(int clientId)
-    {
-        return Items.Where(order => order.ClientId == clientId);
-    }
-
-    public IEnumerable<Order> GetByMakerId(int makerId)
-    {
-        return Items.Where(order => order.MakerId == makerId);
-    }
-    public void Update(Order order)
-    {
-        var existingOrder = GetByOrderId(order.OrderID);
-        if (existingOrder != null)
+        public List<Order> GetByClientId(int clientId)
         {
-            existingOrder.Status = order.Status;
-            existingOrder.ClientId = order.ClientId;
-            existingOrder.MakerId = order.MakerId;
+            return Items.Where(order => order.ClientId == clientId).ToList();
         }
-    }
-    public void Delete(Order order)
-    {
-        Items.Remove(order); 
+
+        public List<Order> GetByMakerId(int makerId)
+        {
+            return Items.Where(order => order.MakerId == makerId).ToList();
+        }
+        public void Delete(Order order)
+        {
+            Items.Remove(order);
+        }
     }
 }

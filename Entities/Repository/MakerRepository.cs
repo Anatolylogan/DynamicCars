@@ -1,11 +1,6 @@
 ﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Domain.Repository
+namespace Infrastructure.Repository
 {
     public class MakerRepository : BaseRepository<Maker>
     {

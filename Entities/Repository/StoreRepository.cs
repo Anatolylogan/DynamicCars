@@ -1,25 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Entities;
+﻿using Domain.Entities;
 
-namespace Domain.Repository
+namespace Infrastructure.Repository;
+public class StoreRepository
 {
-    namespace Domain.Repository
+    private readonly List<Order> storeOrders = new List<Order>();
+    public void AddToStore(Order order)
     {
-        public class StoreRepository
-        {
-            private readonly List<Order> storeOrders = new List<Order>();
-            public void AddToStore(Order order)
-            {
-                storeOrders.Add(order);
-            }
-            public List<Order> GetAll()
-            {
-                return storeOrders;
-            }
-        }
+        storeOrders.Add(order);
+    }
+    public List<Order> GetAll()
+    {
+        return storeOrders;
     }
 }

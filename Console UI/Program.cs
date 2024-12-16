@@ -1,7 +1,4 @@
-﻿
-using Domain.Entities;
-using Domain.Repository;
-using Domain.Repository.Domain.Repository;
+﻿using Infrastructure.Repository;
 using Domain.UseCase;
 using Domain.UseCase.Domain.UseCase;
 
@@ -20,22 +17,33 @@ namespace ConsoleApp
             IdGenerator idGenerator = new IdGenerator();
 
             var clientRepository = new ClientRepository(clientsFilePath);
-            var makerRepository = new MakerRepository(makersFilePath); 
+            var makerRepository = new MakerRepository(makersFilePath);
             var orderRepository = new OrderRepository(ordersFilePath);
             var storeRepository = new StoreRepository();
-            var deliveryRepository = new DeliveryRepository(deliveriesFilePath); 
-            var managerRepository = new ManagerRepository(managersFilePath);
+            var deliveryRepository = new DeliveryRepository(deliveriesFilePath);
 
-            var createOrderUseCase = new CreateOrderUseCase(orderRepository, clientRepository, idGenerator);
+            var managerRepository = new ManagerRepository(managersFilePath);
             var registerClientUseCase = new RegisterClientUseCase(clientRepository);
             var loginClientUseCase = new LoginClientUseCase(clientRepository);
             var assignMakerToOrderUseCase = new AssignMakerToOrderUseCase(orderRepository, makerRepository);
             var cancelOrderUseCase = new CancelOrderUseCase(orderRepository);
-            var completeMakingUseCase = new CompleteMakingUseCase(orderRepository);
             var sendToStoreUseCase = new SendToStoreUseCase(orderRepository, storeRepository);
             var sendToDeliveryUseCase = new SendToDeliveryUseCase(orderRepository, deliveryRepository);
             var managerService = new ManagerService(orderRepository, makerRepository, managerRepository);
             var registerManagerUseCase = new RegisterManagerUseCase(managerRepository);
+            var createOrderUseCase = new CreateOrderUseCase(orderRepository, clientRepository, idGenerator)
+            {
+                Logger = Logger.LogToConsole
+            };
+            var completeMakingUseCase = new CompleteMakingUseCase(orderRepository)
+            {
+                Logger = Logger.LogToConsole
+            };
+            var orderCostCalculatorUse = new OrderCostCalculatorUseCase
+            {
+                Logger = Logger.LogToConsole
+            };
+
 
             bool exit = false;
 
@@ -53,7 +61,7 @@ namespace ConsoleApp
                 switch (choice)
                 {
                     case "1":
-                        ShowClientMenu(clientRepository, createOrderUseCase, loginClientUseCase, cancelOrderUseCase, registerClientUseCase);
+                        ShowClientMenu(clientRepository, createOrderUseCase, loginClientUseCase, cancelOrderUseCase, registerClientUseCase, orderCostCalculatorUse, orderRepository);
                         break;
                     case "2":
                         ShowManagerMenu(managerRepository, createOrderUseCase, assignMakerToOrderUseCase, completeMakingUseCase, sendToStoreUseCase, sendToDeliveryUseCase, registerManagerUseCase, orderRepository);
@@ -68,7 +76,7 @@ namespace ConsoleApp
             }
         }
 
-        static void ShowClientMenu(ClientRepository clientRepository, CreateOrderUseCase createOrderUseCase, LoginClientUseCase loginClientUseCase, CancelOrderUseCase cancelOrderUseCase, RegisterClientUseCase registerClientUseCase)
+        static void ShowClientMenu(ClientRepository clientRepository, CreateOrderUseCase createOrderUseCase, LoginClientUseCase loginClientUseCase, CancelOrderUseCase cancelOrderUseCase, RegisterClientUseCase registerClientUseCase,OrderCostCalculatorUseCase orderCostCalculator, OrderRepository orderRepository)
         {
             bool exitClientMenu = false;
 
@@ -79,8 +87,9 @@ namespace ConsoleApp
                 Console.WriteLine("1. Зарегистрироваться");
                 Console.WriteLine("2. Войти");
                 Console.WriteLine("3. Сделать заказ");
-                Console.WriteLine("4. Отменить заказ");
-                Console.WriteLine("5. Назад");
+                Console.WriteLine("4. Рассчитать стоимость заказа");
+                Console.WriteLine("5. Отменить заказ");
+                Console.WriteLine("6. Назад");
                 Console.Write("Выберите опцию: ");
                 string choice = Console.ReadLine();
 
@@ -96,9 +105,12 @@ namespace ConsoleApp
                         MakeOrder(createOrderUseCase);
                         break;
                     case "4":
-                        CancelOrder(cancelOrderUseCase);
+                        CalculateOrderCost(orderCostCalculator, orderRepository);
                         break;
                     case "5":
+                        CancelOrder(cancelOrderUseCase);
+                        break;
+                    case "6":
                         exitClientMenu = true;
                         break;
                     default:
@@ -113,7 +125,7 @@ namespace ConsoleApp
             Console.Write("Введите имя клиента: ");
             string clientName = Console.ReadLine();
             var client = registerClientUseCase.Execute(clientName);
-            Console.WriteLine($"Клиент {client.Name} успешно зарегистрирован с ID {client.ClientId}");
+            Console.WriteLine($"Клиент {client.Name} успешно зарегистрирован с ID {client.Id}");
             Console.ReadKey();
         }
 
@@ -147,6 +159,22 @@ namespace ConsoleApp
             });
 
             Console.WriteLine($"Заказ создан с маркой автомобиля {carBrand} и цветом ковров {carpetColor}.");
+            Console.ReadKey();
+        }
+        static void CalculateOrderCost(OrderCostCalculatorUseCase costCalculator, OrderRepository orderRepository)
+        {
+            Console.Write("Введите ID заказа для расчета стоимости: ");
+            int orderId = int.Parse(Console.ReadLine());
+            var order = orderRepository.GetById(orderId);
+            if (order != null)
+            {
+                decimal cost = costCalculator.CalculateCost(order);
+                Console.WriteLine($"Стоимость заказа ID {orderId}: {cost}.");
+            }
+            else
+            {
+                Console.WriteLine("Заказ не найден.");
+            }
             Console.ReadKey();
         }
 
@@ -218,7 +246,7 @@ namespace ConsoleApp
             Console.Write("Введите имя менеджера: ");
             string managerName = Console.ReadLine();
             var manager = registerManagerUseCase.Execute(managerName);
-            Console.WriteLine($"Менеджер {manager.Name} успешно зарегистрирован с ID {manager.ManagerId}");
+            Console.WriteLine($"Менеджер {manager.Name} успешно зарегистрирован с ID {manager.Id}");
             Console.ReadKey();
         }
 
@@ -243,7 +271,7 @@ namespace ConsoleApp
             var orders = orderRepository.GetAll();
             foreach (var order in orders)
             {
-                Console.WriteLine($"ID: {order.OrderID}, Клиент: {order.ClientId}, Статус: {order.Status}");
+                Console.WriteLine($"ID заказа: {order.Id}, ID Клиента : {order.Id}, Статус заказа: {order.Status}");
             }
             Console.ReadKey();
         }

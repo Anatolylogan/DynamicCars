@@ -1,10 +1,6 @@
 ﻿using Domain.Entities;
-using Domain.Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Infrastructure.Repository;
+
 
 namespace Domain.UseCase
 {
@@ -23,21 +19,21 @@ namespace Domain.UseCase
 
             public void Execute(int orderId, string address)
             {
-                var order = _orderRepository.GetByOrderId(orderId);
+                var order = _orderRepository.GetById(orderId);
                 if (order == null)
                 {
                     throw new Exception("Заказ не найден");
                 }
                 var delivery = new Delivery
                 {
-                    OrderId = order.OrderID, 
+                    OrderId = order.Id, 
                     Address = address
                 };
                 _deliveryRepository.Add(delivery);
-                order.Status = "На доставке";
-                _orderRepository.Update(order, o => o.OrderID == order.OrderID);
+                order.Status = OrderStatus.OnDelivery;
+                _orderRepository.Update(order);
 
-                Console.WriteLine($"Заказ с ID {order.OrderID} отправлен на доставку.");
+                Console.WriteLine($"Заказ с ID {order.Id} отправлен на доставку.");
             }
         }
     }

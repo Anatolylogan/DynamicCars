@@ -1,6 +1,4 @@
-﻿
-using Domain.Entities;
-using Domain.Repository;
+﻿using Infrastructure.Repository;
 
 namespace Domain.UseCase
 {
@@ -17,7 +15,7 @@ namespace Domain.UseCase
 
         public void Execute(int orderId, string Name)
         { 
-            var order = _orderRepository.GetByOrderId(orderId);
+            var order = _orderRepository.GetById(orderId);
             if (order == null)
             {
                 throw new Exception("Заказ не найден");
@@ -28,9 +26,9 @@ namespace Domain.UseCase
                 throw new Exception("Изготовитель не найден");
             }
             order.Maker = maker;
-            order.MakerId = maker.MakerId;
-            order.Status = "Назначен изготовитель";
-            _orderRepository.Update(order, o => o.OrderID == orderId); 
+            order.MakerId = maker.Id;
+            order.Status = OrderStatus.New;
+            _orderRepository.Update(order); 
         }
     }
 }

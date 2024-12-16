@@ -1,33 +1,33 @@
-﻿using Domain.Entities;
-using Domain.Repository;
+﻿using Infrastructure.Repository;
 
 namespace Domain.UseCase
 {
     public class SendOrderToStore
     {
-        private readonly StoreService storeService;
         private readonly OrderRepository orderRepository;
 
-        public SendOrderToStore(StoreService storeService, OrderRepository orderRepository)
+        public SendOrderToStore(OrderRepository orderRepository)
         {
-            this.storeService = storeService;
             this.orderRepository = orderRepository;
         }
 
         public void Execute(int orderId)
         {
-            var orders = orderRepository.GetAll();
-            if (!orders.Any())
+            var order = orderRepository.GetById(orderId);
+            if (order == null)
             {
-                Console.WriteLine("Нет доступных заказов.");
+                Console.WriteLine($"Заказ с ID {orderId} не найден.");
                 return;
             }
-
-            Console.WriteLine("Доступные заказы:");
-            foreach (var order in orders)
+            if (order.Status != OrderStatus.Completed)
             {
-                Console.WriteLine($"ID: {order.OrderID}, Клиент: {order.Client.Name}, Статус: {order.Status}");
-            }
+                Console.WriteLine($"Заказ с ID {orderId} не готов для отправки на склад. Текущий статус: {order.Status}.");
+                return;
+            }         
+            order.Status = OrderStatus.Warehouse;
+            orderRepository.Update(order);
+
+            Console.WriteLine($"Заказ с ID {orderId} успешно отправлен на склад.");
         }
     }
 }

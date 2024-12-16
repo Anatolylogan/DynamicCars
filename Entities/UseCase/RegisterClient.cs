@@ -1,5 +1,5 @@
 ﻿using Domain.Entities;
-using Domain.Repository;
+using Infrastructure.Repository;
 
 namespace Domain.UseCase
 {
