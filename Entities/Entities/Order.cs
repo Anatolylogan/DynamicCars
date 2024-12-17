@@ -12,6 +12,7 @@ namespace Domain.Entities
         public string CarpetColor { get; set; }
         public DateTime CreationDate { get; set; } = DateTime.Now;
         public decimal TotalCost { get; set; }
+        public string ClientEmail { get; set; }
     }
 
 }

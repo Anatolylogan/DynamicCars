@@ -1,6 +1,8 @@
 ﻿using Infrastructure.Repository;
 using Domain.UseCase;
 using Domain.UseCase.Domain.UseCase;
+using Infrastructure.Notifications;
+using Domain.Entities;
 
 namespace ConsoleApp
 {
@@ -22,6 +24,9 @@ namespace ConsoleApp
             var storeRepository = new StoreRepository();
             var deliveryRepository = new DeliveryRepository(deliveriesFilePath);
 
+            var orderProcessor = new OrderProcessor();
+            var notificationService = new NotificationService();
+            var emailService = new EmailService();
             var managerRepository = new ManagerRepository(managersFilePath);
             var registerClientUseCase = new RegisterClientUseCase(clientRepository);
             var loginClientUseCase = new LoginClientUseCase(clientRepository);
@@ -35,7 +40,7 @@ namespace ConsoleApp
             {
                 Logger = Logger.LogToConsole
             };
-            var completeMakingUseCase = new CompleteMakingUseCase(orderRepository)
+            var completeMakingUseCase = new CompleteMakingUseCase(orderRepository,orderProcessor)
             {
                 Logger = Logger.LogToConsole
             };
@@ -44,6 +49,8 @@ namespace ConsoleApp
                 Logger = Logger.LogToConsole
             };
 
+            orderProcessor.OrderReady += notificationService.NotifyOrderReady;
+            orderProcessor.OrderReady += emailService.SendOrderReadyEmail;
 
             bool exit = false;
 
@@ -61,10 +68,10 @@ namespace ConsoleApp
                 switch (choice)
                 {
                     case "1":
-                        ShowClientMenu(clientRepository, createOrderUseCase, loginClientUseCase, cancelOrderUseCase, registerClientUseCase, orderCostCalculatorUse, orderRepository);
+                        ShowClientMenu(clientRepository, createOrderUseCase, loginClientUseCase, cancelOrderUseCase, registerClientUseCase, orderCostCalculatorUse, orderRepository, orderProcessor);
                         break;
                     case "2":
-                        ShowManagerMenu(managerRepository, createOrderUseCase, assignMakerToOrderUseCase, completeMakingUseCase, sendToStoreUseCase, sendToDeliveryUseCase, registerManagerUseCase, orderRepository);
+                        ShowManagerMenu(managerRepository, createOrderUseCase, assignMakerToOrderUseCase, completeMakingUseCase, sendToStoreUseCase, sendToDeliveryUseCase, registerManagerUseCase, orderRepository, orderProcessor);
                         break;
                     case "3":
                         exit = true;
@@ -76,7 +83,7 @@ namespace ConsoleApp
             }
         }
 
-        static void ShowClientMenu(ClientRepository clientRepository, CreateOrderUseCase createOrderUseCase, LoginClientUseCase loginClientUseCase, CancelOrderUseCase cancelOrderUseCase, RegisterClientUseCase registerClientUseCase,OrderCostCalculatorUseCase orderCostCalculator, OrderRepository orderRepository)
+        static void ShowClientMenu(ClientRepository clientRepository, CreateOrderUseCase createOrderUseCase, LoginClientUseCase loginClientUseCase, CancelOrderUseCase cancelOrderUseCase, RegisterClientUseCase registerClientUseCase,OrderCostCalculatorUseCase orderCostCalculator, OrderRepository orderRepository,OrderProcessor orderProcessor)
         {
             bool exitClientMenu = false;
 
@@ -189,7 +196,7 @@ namespace ConsoleApp
             Console.ReadKey();
         }
 
-        static void ShowManagerMenu(ManagerRepository managerRepository, CreateOrderUseCase createOrderUseCase, AssignMakerToOrderUseCase assignMakerToOrderUseCase, CompleteMakingUseCase completeMakingUseCase, SendToStoreUseCase sendToStoreUseCase, SendToDeliveryUseCase sendToDeliveryUseCase, RegisterManagerUseCase registerManagerUseCase, OrderRepository orderRepository)
+        static void ShowManagerMenu(ManagerRepository managerRepository, CreateOrderUseCase createOrderUseCase, AssignMakerToOrderUseCase assignMakerToOrderUseCase, CompleteMakingUseCase completeMakingUseCase, SendToStoreUseCase sendToStoreUseCase, SendToDeliveryUseCase sendToDeliveryUseCase, RegisterManagerUseCase registerManagerUseCase, OrderRepository orderRepository, OrderProcessor orderProcessor)
         {
             bool exitManagerMenu = false;
 
@@ -223,7 +230,7 @@ namespace ConsoleApp
                         AssignOrderToMaker(assignMakerToOrderUseCase);
                         break;
                     case "5":
-                        CompleteOrder(completeMakingUseCase);
+                        CompleteOrder(completeMakingUseCase,orderProcessor,orderRepository);
                         break;
                     case "6":
                         SendToStore(sendToStoreUseCase);
@@ -287,14 +294,20 @@ namespace ConsoleApp
             Console.ReadKey();
         }
 
-        static void CompleteOrder(CompleteMakingUseCase completeMakingUseCase)
+        static void CompleteOrder(CompleteMakingUseCase completeMakingUseCase, OrderProcessor orderProcessor, OrderRepository orderRepository)
         {
             Console.Write("Введите ID заказа для изменения статуса на выполнено: ");
-            int orderId = int.Parse(Console.ReadLine());
+            int.TryParse(Console.ReadLine(), out int orderId);
+            var order = orderRepository.GetById(orderId);
             completeMakingUseCase.Execute(orderId);
+            Console.Write("Введите Email клиента: ");
+            string clientEmail = Console.ReadLine();
+            order.ClientEmail = clientEmail;
+            orderProcessor.MarkOrderAsReady(order);
             Console.WriteLine($"Заказ с ID {orderId} был завершен.");
             Console.ReadKey();
         }
+
 
         static void SendToStore(SendToStoreUseCase sendToStoreUseCase)
         {
