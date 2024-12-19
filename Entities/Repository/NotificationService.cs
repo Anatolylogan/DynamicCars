@@ -1,20 +1,21 @@
-﻿using Domain.UseCase;
+﻿using Domain.Entities;
+using Domain.UseCase;
 
-namespace Infrastructure.Notifications
+public class NotificationService
 {
-    public class NotificationService
+    public void RegisterSubscriptions(CompleteMakingUseCase useCase)
     {
-        public void NotifyOrderReady(object sender, OrderEventArgs e)
-        {
-            Console.WriteLine($"[Уведомление]: Заказ с ID {e.Order.Id} готов.");
-        }
+        useCase.OrderReady += NotifyConsole;
+        useCase.OrderReady += NotifyEmail;
     }
 
-    public class EmailService
+    private void NotifyConsole(Order order)
     {
-        public void SendOrderReadyEmail(object sender, OrderEventArgs e)
-        {
-            Console.WriteLine($"[Email]: Заказ с ID {e.Order.Id} готов. Отправка email на адрес {e.Order.ClientEmail}...");
-        }
+        Console.WriteLine($"Уведомление: Заказ с ID {order.Id} готов для клиента {order.ClientEmail}.");
+    }
+
+    private void NotifyEmail(Order order)
+    {
+        Console.WriteLine($"Отправка email на адрес {order.ClientEmail}: Ваш заказ с ID {order.Id} готов.");
     }
 }
