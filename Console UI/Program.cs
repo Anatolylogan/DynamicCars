@@ -22,6 +22,7 @@ namespace ConsoleApp
             var storeRepository = new StoreRepository();
             var deliveryRepository = new DeliveryRepository(deliveriesFilePath);
 
+            var filterOrdersByStatusUseCase = new FilterOrdersByStatusUseCase(orderRepository);
             var notificationService = new NotificationService();
             var managerRepository = new ManagerRepository(managersFilePath);
             var registerClientUseCase = new RegisterClientUseCase(clientRepository);
@@ -75,7 +76,7 @@ namespace ConsoleApp
                         ShowClientMenu(clientRepository, createOrderUseCase, loginClientUseCase, cancelOrderUseCase, registerClientUseCase, orderCostCalculatorUse, orderRepository);
                         break;
                     case "2":
-                        ShowManagerMenu(managerRepository, createOrderUseCase, assignMakerToOrderUseCase, completeMakingUseCase, sendToStoreUseCase, sendToDeliveryUseCase, registerManagerUseCase, orderRepository);
+                        ShowManagerMenu(managerRepository, createOrderUseCase, assignMakerToOrderUseCase, completeMakingUseCase, sendToStoreUseCase, sendToDeliveryUseCase, registerManagerUseCase, orderRepository, filterOrdersByStatusUseCase);
                         break;
                     case "3":
                         exit = true;
@@ -200,7 +201,7 @@ namespace ConsoleApp
             Console.ReadKey();
         }
 
-        static void ShowManagerMenu(ManagerRepository managerRepository, CreateOrderUseCase createOrderUseCase, AssignMakerToOrderUseCase assignMakerToOrderUseCase, CompleteMakingUseCase completeMakingUseCase, SendToStoreUseCase sendToStoreUseCase, SendToDeliveryUseCase sendToDeliveryUseCase, RegisterManagerUseCase registerManagerUseCase, OrderRepository orderRepository)
+        static void ShowManagerMenu(ManagerRepository managerRepository, CreateOrderUseCase createOrderUseCase, AssignMakerToOrderUseCase assignMakerToOrderUseCase, CompleteMakingUseCase completeMakingUseCase, SendToStoreUseCase sendToStoreUseCase, SendToDeliveryUseCase sendToDeliveryUseCase, RegisterManagerUseCase registerManagerUseCase, OrderRepository orderRepository, FilterOrdersByStatusUseCase filterOrdersByStatusUseCase)
         {
             bool exitManagerMenu = false;
 
@@ -215,7 +216,8 @@ namespace ConsoleApp
                 Console.WriteLine("5. Изменить статус заказа на выполнено");
                 Console.WriteLine("6. Отправить заказ на склад");
                 Console.WriteLine("7. Отправить заказ на доставку");
-                Console.WriteLine("8. Назад");
+                Console.WriteLine("8. Отобразить заказы по статусу");
+                Console.WriteLine("9. Назад");
                 Console.Write("Выберите опцию: ");
                 string choice = Console.ReadLine();
 
@@ -243,6 +245,9 @@ namespace ConsoleApp
                         SendToDelivery(sendToDeliveryUseCase);
                         break;
                     case "8":
+                        FilterOrders(orderRepository, filterOrdersByStatusUseCase);
+                        break;
+                    case "9":
                         exitManagerMenu = true;
                         break;
                     default:
@@ -338,6 +343,34 @@ namespace ConsoleApp
             var address = Console.ReadLine();
             sendToDeliveryUseCase.Execute(orderId, address);
             Console.WriteLine($"Заказ с ID {orderId} отправлен на доставку по адресу {address}");
+            Console.ReadKey();
+        }
+        static void FilterOrders(OrderRepository orderRepository, FilterOrdersByStatusUseCase filterOrdersByStatusUseCase)
+        {
+            Console.WriteLine("Введите статус для фильтрации заказов.(Статусы:'New','InProgress','Completed','Warehouse','OnDelivery','Canceled'");
+            string statusInput = Console.ReadLine();
+
+            if (Enum.TryParse(statusInput, true, out OrderStatus status))
+            {
+                var filteredOrders = filterOrdersByStatusUseCase.Execute(status);
+
+                if (filteredOrders.Any())
+                {
+                    Console.WriteLine("Найденные заказы:");
+                    foreach (var order in filteredOrders)
+                    {
+                        Console.WriteLine($"ID: {order.Id}, Клиент ID: {order.ClientId}, Статус: {order.Status}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Нет заказов с указанным статусом.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Неверный статус. Попробуйте снова.");
+            }
             Console.ReadKey();
         }
     }

@@ -10,7 +10,6 @@ namespace Infrastructure.Repository
         {
             return Items.Where(order => order.ClientId == clientId).ToList();
         }
-
         public List<Order> GetByMakerId(int makerId)
         {
             return Items.Where(order => order.MakerId == makerId).ToList();
@@ -18,6 +17,10 @@ namespace Infrastructure.Repository
         public void Delete(Order order)
         {
             Items.Remove(order);
+        }
+        public List<Order> GetOrdersByStatus(Func<Order, bool> filter)
+        {
+            return Items.Where(filter).ToList();
         }
     }
 }
