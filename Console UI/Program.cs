@@ -21,7 +21,9 @@ namespace ConsoleApp
             var orderRepository = new OrderRepository(ordersFilePath);
             var storeRepository = new StoreRepository();
             var deliveryRepository = new DeliveryRepository(deliveriesFilePath);
+            var pricingRepository = new PricingRepository();
 
+            var calculateOrderCostUseCase = new CalculateOrderCostUseCase(pricingRepository);
             var filterOrdersByStatusUseCase = new FilterOrdersByStatusUseCase(orderRepository);
             var notificationService = new NotificationService();
             var managerRepository = new ManagerRepository(managersFilePath);
@@ -38,10 +40,6 @@ namespace ConsoleApp
                 Logger = Logger.LogToConsole
             };
             var completeMakingUseCase = new CompleteMakingUseCase(orderRepository)
-            {
-                Logger = Logger.LogToConsole
-            };
-            var orderCostCalculatorUse = new OrderCostCalculatorUseCase
             {
                 Logger = Logger.LogToConsole
             };
@@ -73,7 +71,7 @@ namespace ConsoleApp
                 switch (choice)
                 {
                     case "1":
-                        ShowClientMenu(clientRepository, createOrderUseCase, loginClientUseCase, cancelOrderUseCase, registerClientUseCase, orderCostCalculatorUse, orderRepository);
+                        ShowClientMenu(clientRepository, createOrderUseCase, loginClientUseCase, cancelOrderUseCase, registerClientUseCase, calculateOrderCostUseCase,orderRepository);
                         break;
                     case "2":
                         ShowManagerMenu(managerRepository, createOrderUseCase, assignMakerToOrderUseCase, completeMakingUseCase, sendToStoreUseCase, sendToDeliveryUseCase, registerManagerUseCase, orderRepository, filterOrdersByStatusUseCase);
@@ -88,7 +86,7 @@ namespace ConsoleApp
             }
         }
 
-        static void ShowClientMenu(ClientRepository clientRepository, CreateOrderUseCase createOrderUseCase, LoginClientUseCase loginClientUseCase, CancelOrderUseCase cancelOrderUseCase, RegisterClientUseCase registerClientUseCase, OrderCostCalculatorUseCase orderCostCalculator, OrderRepository orderRepository)
+        static void ShowClientMenu(ClientRepository clientRepository, CreateOrderUseCase createOrderUseCase, LoginClientUseCase loginClientUseCase, CancelOrderUseCase cancelOrderUseCase, RegisterClientUseCase registerClientUseCase, CalculateOrderCostUseCase orderCostCalculator, OrderRepository orderRepository)
         {
             bool exitClientMenu = false;
 
@@ -173,20 +171,43 @@ namespace ConsoleApp
             Console.WriteLine($"Заказ создан с маркой автомобиля {carBrand} и цветом ковров {carpetColor}.");
             Console.ReadKey();
         }
-        static void CalculateOrderCost(OrderCostCalculatorUseCase costCalculator, OrderRepository orderRepository)
+        static void CalculateOrderCost(CalculateOrderCostUseCase costCalculatorUseCase, OrderRepository orderRepository)
         {
             Console.Write("Введите ID заказа для расчета стоимости: ");
             int orderId = int.Parse(Console.ReadLine());
             var order = orderRepository.GetById(orderId);
+
             if (order != null)
             {
-                decimal cost = costCalculator.CalculateCost(order);
-                Console.WriteLine($"Стоимость заказа ID {orderId}: {cost}.");
+                if (order.Items == null || !order.Items.Any())
+                {
+                    Console.WriteLine("Заказ не содержит товаров. Невозможно рассчитать стоимость.");
+                }
+                else
+                {
+                    Console.WriteLine("Выберите тип расчета:");
+                    Console.WriteLine("1. Без скидки");
+                    Console.WriteLine("2. С учетом скидки для постоянных клиентов");
+                    string choice = Console.ReadLine();
+
+                    string calculatorType = choice == "1" ? "basic" : "discounted";
+
+                    try
+                    {
+                        decimal cost = costCalculatorUseCase.Execute(order, calculatorType);
+                        Console.WriteLine($"Стоимость заказа ID {orderId}: {cost}.");
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        Console.WriteLine($"Ошибка: {ex.Message}");
+                    }
+                }
             }
             else
             {
                 Console.WriteLine("Заказ не найден.");
             }
+
             Console.ReadKey();
         }
 

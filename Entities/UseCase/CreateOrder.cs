@@ -1,13 +1,14 @@
 ﻿using Domain.Entities;
-using Infrastructure.Repository;
 using Domain.UseCase;
+using Infrastructure.Repository;
 
 public class CreateOrderUseCase
 {
     private readonly OrderRepository _orderRepository;
     private readonly ClientRepository _clientRepository;
     private readonly IdGenerator _idGenerator;
-    public LogHandler Logger { get; set; } 
+    public LogHandler Logger { get; set; }
+
     public CreateOrderUseCase(OrderRepository orderRepository, ClientRepository clientRepository, IdGenerator idGenerator)
     {
         _orderRepository = orderRepository;
@@ -24,19 +25,20 @@ public class CreateOrderUseCase
             throw new Exception("Клиент не найден.");
         }
 
-        foreach (var choice in matChoices)
+        var order = new Order
         {
-            var order = new Order
+            Id = _idGenerator.GenerateId(),
+            ClientId = clientId,
+            Status = OrderStatus.New,
+            Items = matChoices.Select(choice => new OrderItem
             {
-                Id = _idGenerator.GenerateId(),
-                ClientId = clientId,
-                Status = OrderStatus.New,
-                CarBrand = choice.carBrand,
-                CarpetColor = choice.color
-            };
-            _orderRepository.Add(order);
+                CarpetColor = choice.color,
+                CarBrand = choice.carBrand
+            }).ToList()
+        };
 
-            Logger?.Invoke($"Создан заказ: ID {order.Id}, клиент {clientId}, автомобиль {choice.carBrand}, цвет {choice.color}");
-        }
+        _orderRepository.Add(order);
+
+        Logger?.Invoke($"Создан заказ: ID {order.Id}, клиент {clientId}, товаров {order.Items.Count}");
     }
 }

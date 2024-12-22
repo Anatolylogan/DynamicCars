@@ -1,19 +1,33 @@
 ﻿using Domain.Entities;
+using Infrastructure.Repository;
 
 namespace Domain.UseCase
 {
-    public class OrderCostCalculatorUseCase
+    public class CalculateOrderCostUseCase
     {
-        public LogHandler Logger { get; set; } 
+        private readonly ICostCalculator _basicCostCalculator;
+        private readonly ICostCalculator _discountedCostCalculator;
 
-        public decimal CalculateCost(Order order)
+        public CalculateOrderCostUseCase(PricingRepository pricingRepository)
         {
-            decimal baseCost = 3000m; 
-            decimal carpetCost = 500m;
-            decimal totalCost = baseCost + carpetCost;
-            Logger?.Invoke($"Расчет стоимости заказа ID {order.Id}: {totalCost}.");
-            return totalCost;
+            _basicCostCalculator = new BasicCostCalculator(pricingRepository);
+            _discountedCostCalculator = new DiscountedCostCalculator(pricingRepository);
+        }
+
+        public decimal Execute(Order order, string calculatorType)
+        {
+            var calculator = GetCostCalculator(calculatorType);
+            return calculator.Calculate(order);
+        }
+
+        private ICostCalculator GetCostCalculator(string type)
+        {
+            return type.ToLower() switch
+            {
+                "basic" => _basicCostCalculator,
+                "discounted" => _discountedCostCalculator,
+                _ => throw new ArgumentException("Неизвестный тип калькулятора")
+            };
         }
     }
-
 }
