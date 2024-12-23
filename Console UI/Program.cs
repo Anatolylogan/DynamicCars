@@ -8,7 +8,7 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            string ordersFilePath = "orders.json";
+            string itemsFilePath = "items.json";
             string clientsFilePath = "clients.json";
             string makersFilePath = "makers.json";
             string deliveriesFilePath = "deliveries.json";
@@ -18,7 +18,7 @@ namespace ConsoleApp
 
             var clientRepository = new ClientRepository(clientsFilePath);
             var makerRepository = new MakerRepository(makersFilePath);
-            var orderRepository = new OrderRepository(ordersFilePath);
+            var orderRepository = new OrderRepository(itemsFilePath);
             var storeRepository = new StoreRepository();
             var deliveryRepository = new DeliveryRepository(deliveriesFilePath);
             var pricingRepository = new PricingRepository();
