@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Repository;
 using Domain.UseCase;
 using Domain.UseCase.Domain.UseCase;
+using Domain.Entities;
 
 namespace ConsoleApp
 {
@@ -14,20 +15,17 @@ namespace ConsoleApp
             string deliveriesFilePath = "deliveries.json";
             string managersFilePath = "managers.json";
 
-            IdGenerator idGenerator = new IdGenerator();
-
             var clientRepository = new ClientRepository(clientsFilePath);
             var makerRepository = new MakerRepository(makersFilePath);
             var orderRepository = new OrderRepository(itemsFilePath);
             var storeRepository = new StoreRepository();
             var deliveryRepository = new DeliveryRepository(deliveriesFilePath);
             var pricingRepository = new PricingRepository();
-
+         
             var calculateOrderCostUseCase = new CalculateOrderCostUseCase(pricingRepository);
             var filterOrdersByStatusUseCase = new FilterOrdersByStatusUseCase(orderRepository);
             var notificationService = new NotificationService();
             var managerRepository = new ManagerRepository(managersFilePath);
-            var registerClientUseCase = new RegisterClientUseCase(clientRepository);
             var loginClientUseCase = new LoginClientUseCase(clientRepository);
             var assignMakerToOrderUseCase = new AssignMakerToOrderUseCase(orderRepository, makerRepository);
             var cancelOrderUseCase = new CancelOrderUseCase(orderRepository);
@@ -35,10 +33,6 @@ namespace ConsoleApp
             var sendToDeliveryUseCase = new SendToDeliveryUseCase(orderRepository, deliveryRepository);
             var managerService = new ManagerService(orderRepository, makerRepository, managerRepository);
             var registerManagerUseCase = new RegisterManagerUseCase(managerRepository);
-            var createOrderUseCase = new CreateOrderUseCase(orderRepository, clientRepository, idGenerator)
-            {
-                Logger = Logger.LogToConsole
-            };
             var completeMakingUseCase = new CompleteMakingUseCase(orderRepository)
             {
                 Logger = Logger.LogToConsole
@@ -52,6 +46,15 @@ namespace ConsoleApp
             {
                 Console.WriteLine($"Отправка email на адрес {order.ClientEmail}: Ваш заказ с ID {order.Id} готов.");
             };
+            int maxOrderId = orderRepository.GetAll().Any() ? orderRepository.GetAll().Max(o => o.Id) : 0;
+            int maxClientId = clientRepository.GetAll().Any() ? clientRepository.GetAll().Max(c => c.Id) : 0;
+            int startId = Math.Max(maxOrderId, maxClientId);
+            IdGenerator idGenerator = new IdGenerator(startId);
+            var createOrderUseCase = new CreateOrderUseCase(orderRepository, clientRepository, idGenerator)
+            {
+                Logger = Logger.LogToConsole
+            };
+            var registerClientUseCase = new RegisterClientUseCase(clientRepository, idGenerator);
 
 
 
@@ -74,7 +77,7 @@ namespace ConsoleApp
                         ShowClientMenu(clientRepository, createOrderUseCase, loginClientUseCase, cancelOrderUseCase, registerClientUseCase, calculateOrderCostUseCase,orderRepository);
                         break;
                     case "2":
-                        ShowManagerMenu(managerRepository, createOrderUseCase, assignMakerToOrderUseCase, completeMakingUseCase, sendToStoreUseCase, sendToDeliveryUseCase, registerManagerUseCase, orderRepository, filterOrdersByStatusUseCase);
+                        ShowManagerMenu(managerRepository, createOrderUseCase, assignMakerToOrderUseCase, completeMakingUseCase, sendToStoreUseCase, sendToDeliveryUseCase, registerManagerUseCase, orderRepository, filterOrdersByStatusUseCase, clientRepository);
                         break;
                     case "3":
                         exit = true;
@@ -112,7 +115,7 @@ namespace ConsoleApp
                         LoginClient(loginClientUseCase);
                         break;
                     case "3":
-                        MakeOrder(createOrderUseCase);
+                        MakeOrder(createOrderUseCase,clientRepository);
                         break;
                     case "4":
                         CalculateOrderCost(orderCostCalculator, orderRepository);
@@ -155,10 +158,11 @@ namespace ConsoleApp
             Console.ReadKey();
         }
 
-        static void MakeOrder(CreateOrderUseCase createOrderUseCase)
+        static void MakeOrder(CreateOrderUseCase createOrderUseCase,ClientRepository clientRepository)
         {
             Console.Write("Введите ID клиента для заказа: ");
             int orderClientId = int.Parse(Console.ReadLine());
+            var client = clientRepository.GetById(orderClientId);
             Console.Write("Введите марку автомобиля: ");
             string carBrand = Console.ReadLine();
             Console.Write("Введите цвет ковров: ");
@@ -169,6 +173,7 @@ namespace ConsoleApp
             });
 
             Console.WriteLine($"Заказ создан с маркой автомобиля {carBrand} и цветом ковров {carpetColor}.");
+            Console.WriteLine($"Заказ оформлен: {client.Name}, ID: {client.Id}");
             Console.ReadKey();
         }
         static void CalculateOrderCost(CalculateOrderCostUseCase costCalculatorUseCase, OrderRepository orderRepository)
@@ -222,7 +227,7 @@ namespace ConsoleApp
             Console.ReadKey();
         }
 
-        static void ShowManagerMenu(ManagerRepository managerRepository, CreateOrderUseCase createOrderUseCase, AssignMakerToOrderUseCase assignMakerToOrderUseCase, CompleteMakingUseCase completeMakingUseCase, SendToStoreUseCase sendToStoreUseCase, SendToDeliveryUseCase sendToDeliveryUseCase, RegisterManagerUseCase registerManagerUseCase, OrderRepository orderRepository, FilterOrdersByStatusUseCase filterOrdersByStatusUseCase)
+        static void ShowManagerMenu(ManagerRepository managerRepository, CreateOrderUseCase createOrderUseCase, AssignMakerToOrderUseCase assignMakerToOrderUseCase, CompleteMakingUseCase completeMakingUseCase, SendToStoreUseCase sendToStoreUseCase, SendToDeliveryUseCase sendToDeliveryUseCase, RegisterManagerUseCase registerManagerUseCase, OrderRepository orderRepository, FilterOrdersByStatusUseCase filterOrdersByStatusUseCase, ClientRepository clientRepository)
         {
             bool exitManagerMenu = false;
 
@@ -251,7 +256,7 @@ namespace ConsoleApp
                         LoginManager(managerRepository);
                         break;
                     case "3":
-                        ListOrders(orderRepository);
+                        ListOrders(orderRepository, clientRepository);
                         break;
                     case "4":
                         AssignOrderToMaker(assignMakerToOrderUseCase);
@@ -303,15 +308,35 @@ namespace ConsoleApp
             Console.ReadKey();
         }
 
-        static void ListOrders(OrderRepository orderRepository)
+        static void ListOrders(OrderRepository orderRepository,ClientRepository clientRepository)
         {
             var orders = orderRepository.GetAll();
+
+            if (!orders.Any())
+            {
+                Console.WriteLine("Список заказов пуст.");
+                return;
+            }
+
+            Console.WriteLine("Список заказов:");
+            Console.WriteLine();
             foreach (var order in orders)
             {
-                Console.WriteLine($"ID заказа: {order.Id}, ID Клиента : {order.Id}, Статус заказа: {order.Status}");
+                var client = clientRepository.GetById(order.ClientId);
+
+                string clientName = client != null ? client.Name : "Неизвестный клиент";
+
+                Console.WriteLine($"ID Заказа: {order.Id}");
+                Console.WriteLine($"ID Клиента: {order.ClientId}");
+                Console.WriteLine($"Имя Клиента: {clientName}");
+                Console.WriteLine($"Марка Автомобиля: {order.Items.FirstOrDefault()?.CarBrand ?? "Не задан"}");
+                Console.WriteLine($"Цвет Ковров: {order.Items.FirstOrDefault()?.CarpetColor ?? "Не задан"}");
+                Console.WriteLine($"Статус Заказа: {order.Status}");
+                Console.WriteLine("");
             }
             Console.ReadKey();
         }
+        
 
         static void AssignOrderToMaker(AssignMakerToOrderUseCase assignMakerToOrderUseCase)
         {
