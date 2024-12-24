@@ -1,5 +1,8 @@
-﻿public class OrderItem
+﻿namespace Domain.UseCase
 {
-    public string CarBrand { get; set; }
-    public string CarpetColor { get; set; }
+    public class OrderItem
+    {
+        public string CarBrand { get; set; }
+        public string CarpetColor { get; set; }
+    }
 }

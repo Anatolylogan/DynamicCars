@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using Domain.Entities;
+using System.IO;
 
 namespace Infrastructure.Repository
 {
-
-    public class BaseRepository<T> where T : Entity
+    public class BaseRepository<T> : IRepository<T> where T : Entity
     {
         private readonly string _filePath;
         protected List<T> Items;
@@ -16,7 +16,6 @@ namespace Infrastructure.Repository
         }
         private List<T> LoadFromFile()
         {
-
             try
             {
                 if (!File.Exists(_filePath))
@@ -43,7 +42,7 @@ namespace Infrastructure.Repository
             }
             catch (Exception ex)
             {
-                LogError($"Ошибка при записи файла {_filePath}: {ex.Message}");
+                LogError($"Ошибка при записи в файл {_filePath}: {ex.Message}");
             }
         }
         private void LogError(string message)
@@ -53,6 +52,10 @@ namespace Infrastructure.Repository
         public List<T> GetAll()
         {
             return Items;
+        }
+        public T? GetById(int id)
+        {
+            return Items.FirstOrDefault(item => item.Id == id);
         }
         public void Add(T item)
         {
@@ -64,26 +67,14 @@ namespace Infrastructure.Repository
             Items.Remove(item);
             SaveToFile();
         }
-        public T? GetById(int id)
-        {
-            for (var i = 0; i < Items.Count; i++)
-            {
-                if (Items[i].Id == id)
-                {
-                    return Items[i];
-                }
-            }
-            return default;
-        }
         public void Update(T item)
         {
-            for (var i = 0; i < Items.Count; i++)
+            var existingItem = Items.FirstOrDefault(i => i.Id == item.Id);
+            if (existingItem != null)
             {
-                if (item.Id == Items[i].Id)
-                {
-                    Items[i] = item;
-                    SaveToFile();
-                }
+                var index = Items.IndexOf(existingItem);
+                Items[index] = item;
+                SaveToFile();
             }
         }
     }

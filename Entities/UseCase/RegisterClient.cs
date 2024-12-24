@@ -14,15 +14,27 @@ namespace Domain.UseCase
             _idGenerator = idGenerator;
         }
 
-        public Client Execute(string clientName)
+        public Client Execute(string clientName, string phoneNumber)
         {
-            int newClientId = _idGenerator.GenerateId();
             if (string.IsNullOrWhiteSpace(clientName))
             {
                 throw new ArgumentException("Имя клиента не может быть пустым.");
             }
 
-            var client = new Client { Id = newClientId , Name = clientName };
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                throw new ArgumentException("Номер телефона не может быть пустым.");
+            }
+
+            int newClientId = _idGenerator.GenerateId();
+
+            var client = new Client
+            {
+                Id = newClientId,
+                Name = clientName,
+                PhoneNumber = phoneNumber
+            };
+
             _clientRepository.Add(client);
 
             return client;

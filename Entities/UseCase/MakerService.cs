@@ -11,9 +11,6 @@ namespace Domain.UseCase
         {
             orderRepository = orderRepo;
         }
-        public void CompleteMaking(Order order) //Метод для заверние изготовление
-        {
-            order.Status = OrderStatus.Completed;
-        }
+      
     }
 }

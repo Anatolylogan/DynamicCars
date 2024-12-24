@@ -4,9 +4,10 @@ using Infrastructure.Repository;
 
 public class CreateOrderUseCase
 {
-    private readonly OrderRepository _orderRepository;
-    private readonly ClientRepository _clientRepository;
     private readonly IdGenerator _idGenerator;
+    private readonly IRepository<Order> _orderRepository;
+    private readonly IRepository<Client> _clientRepository;
+
     public LogHandler Logger { get; set; }
 
     public CreateOrderUseCase(OrderRepository orderRepository, ClientRepository clientRepository, IdGenerator idGenerator)
@@ -16,7 +17,7 @@ public class CreateOrderUseCase
         _idGenerator = idGenerator;
     }
 
-    public void Execute(int clientId, List<(string color, string carBrand)> matChoices)
+    public void Execute(int clientId, List<(string color, string carBrand)> matChoices, IDeliveryOption deliveryOption)
     {
         var client = _clientRepository.GetById(clientId);
         if (client == null)
@@ -25,20 +26,28 @@ public class CreateOrderUseCase
             throw new Exception("Клиент не найден.");
         }
 
-        var order = new Order
+        foreach (var choice in matChoices)
         {
-            Id = _idGenerator.GenerateId(),
-            ClientId = clientId,
-            Status = OrderStatus.New,
-            Items = matChoices.Select(choice => new OrderItem
+            var order = new Order
             {
+                Id = _idGenerator.GenerateId(),
+                ClientId = clientId,
+                Status = OrderStatus.New,
+                CarBrand = choice.carBrand,
                 CarpetColor = choice.color,
-                CarBrand = choice.carBrand
-            }).ToList()
-        };
+                DeliveryDetails = deliveryOption.GetDeliveryDetails(),  
+                DeliveryCost = deliveryOption.GetCost()                
+            };
+            order.Items.Add(new OrderItem
+            {
+                CarBrand = choice.carBrand,
+                CarpetColor = choice.color,
+            });
 
-        _orderRepository.Add(order);
+            _orderRepository.Add(order);
 
-        Logger?.Invoke($"Создан заказ: ID {order.Id}, клиент {clientId}, товаров {order.Items.Count}");
+            Logger?.Invoke($"Создан заказ: ID {order.Id}, клиент {clientId}, автомобиль {choice.carBrand}, цвет {choice.color}");
+            Logger?.Invoke($"Способ доставки: {order.DeliveryDetails}, Стоимость доставки: {order.DeliveryCost}");  // Логируем данные доставки
+        }
     }
 }

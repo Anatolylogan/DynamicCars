@@ -21,7 +21,7 @@ namespace ConsoleApp
             var storeRepository = new StoreRepository();
             var deliveryRepository = new DeliveryRepository(deliveriesFilePath);
             var pricingRepository = new PricingRepository();
-         
+
             var calculateOrderCostUseCase = new CalculateOrderCostUseCase(pricingRepository);
             var filterOrdersByStatusUseCase = new FilterOrdersByStatusUseCase(orderRepository);
             var notificationService = new NotificationService();
@@ -74,7 +74,7 @@ namespace ConsoleApp
                 switch (choice)
                 {
                     case "1":
-                        ShowClientMenu(clientRepository, createOrderUseCase, loginClientUseCase, cancelOrderUseCase, registerClientUseCase, calculateOrderCostUseCase,orderRepository);
+                        ShowClientMenu(clientRepository, createOrderUseCase, loginClientUseCase, cancelOrderUseCase, registerClientUseCase, calculateOrderCostUseCase, orderRepository);
                         break;
                     case "2":
                         ShowManagerMenu(managerRepository, createOrderUseCase, assignMakerToOrderUseCase, completeMakingUseCase, sendToStoreUseCase, sendToDeliveryUseCase, registerManagerUseCase, orderRepository, filterOrdersByStatusUseCase, clientRepository);
@@ -115,7 +115,7 @@ namespace ConsoleApp
                         LoginClient(loginClientUseCase);
                         break;
                     case "3":
-                        MakeOrder(createOrderUseCase,clientRepository);
+                        MakeOrder(createOrderUseCase, clientRepository);
                         break;
                     case "4":
                         CalculateOrderCost(orderCostCalculator, orderRepository);
@@ -137,7 +137,9 @@ namespace ConsoleApp
         {
             Console.Write("Введите имя клиента: ");
             string clientName = Console.ReadLine();
-            var client = registerClientUseCase.Execute(clientName);
+            Console.WriteLine("Ввидеите номер телефона(Пример<+7(999)-999-99-99>)");
+            string phoneNumber = Console.ReadLine();
+            var client = registerClientUseCase.Execute(clientName, phoneNumber);
             Console.WriteLine($"Клиент {client.Name} успешно зарегистрирован с ID {client.Id}");
             Console.ReadKey();
         }
@@ -157,23 +159,33 @@ namespace ConsoleApp
             }
             Console.ReadKey();
         }
-
-        static void MakeOrder(CreateOrderUseCase createOrderUseCase,ClientRepository clientRepository)
+        static void MakeOrder(CreateOrderUseCase createOrderUseCase, ClientRepository clientRepository)
         {
             Console.Write("Введите ID клиента для заказа: ");
             int orderClientId = int.Parse(Console.ReadLine());
-            var client = clientRepository.GetById(orderClientId);
             Console.Write("Введите марку автомобиля: ");
             string carBrand = Console.ReadLine();
             Console.Write("Введите цвет ковров: ");
             string carpetColor = Console.ReadLine();
-            createOrderUseCase.Execute(orderClientId, new List<(string color, string carBrand)>
+            Console.WriteLine("Выберите способ доставки:");
+            Console.WriteLine("1. Стандартная доставка");
+            Console.WriteLine("2. Экспресс доставка");
+            Console.WriteLine("3. Доставка на следующий день");
+            string deliveryChoice = Console.ReadLine();
+            IDeliveryOption deliveryOption = deliveryChoice switch
             {
-                (carpetColor, carBrand)
-            });
-
-            Console.WriteLine($"Заказ создан с маркой автомобиля {carBrand} и цветом ковров {carpetColor}.");
-            Console.WriteLine($"Заказ оформлен: {client.Name}, ID: {client.Id}");
+                "1" => new StandardDelivery(),
+                "2" => new ExpressDelivery(),
+                "3" => new NextDayDelivery(),
+                _ => throw new Exception("Неверный выбор способа доставки.")
+            };
+            createOrderUseCase.Execute(orderClientId, new List<(string color, string carBrand)>
+    {
+        (carpetColor, carBrand)
+    }, deliveryOption);
+            Console.WriteLine($"Заказ создан с маркой автомобиля {carBrand}, цветом ковров {carpetColor}.");
+            Console.WriteLine($"Способ доставки: {deliveryOption.GetDeliveryDetails()}");
+            Console.WriteLine($"Стоимость доставки: {deliveryOption.GetCost()}");
             Console.ReadKey();
         }
         static void CalculateOrderCost(CalculateOrderCostUseCase costCalculatorUseCase, OrderRepository orderRepository)
@@ -308,7 +320,7 @@ namespace ConsoleApp
             Console.ReadKey();
         }
 
-        static void ListOrders(OrderRepository orderRepository,ClientRepository clientRepository)
+        static void ListOrders(OrderRepository orderRepository, ClientRepository clientRepository)
         {
             var orders = orderRepository.GetAll();
 
@@ -323,20 +335,25 @@ namespace ConsoleApp
             foreach (var order in orders)
             {
                 var client = clientRepository.GetById(order.ClientId);
+                var Client = clientRepository.GetByPhoneNumber(client.PhoneNumber);
 
                 string clientName = client != null ? client.Name : "Неизвестный клиент";
+                string phoneNumber = client != null ? client.PhoneNumber : "Неизвестный номер телефона";
 
                 Console.WriteLine($"ID Заказа: {order.Id}");
                 Console.WriteLine($"ID Клиента: {order.ClientId}");
                 Console.WriteLine($"Имя Клиента: {clientName}");
+                Console.WriteLine($"Контактный номер телефона: {phoneNumber}");
                 Console.WriteLine($"Марка Автомобиля: {order.Items.FirstOrDefault()?.CarBrand ?? "Не задан"}");
                 Console.WriteLine($"Цвет Ковров: {order.Items.FirstOrDefault()?.CarpetColor ?? "Не задан"}");
+                Console.WriteLine($"Способ доставки: {order.DeliveryDetails}");
+                Console.WriteLine($"Стоимость доставки: {order.DeliveryCost}");
                 Console.WriteLine($"Статус Заказа: {order.Status}");
                 Console.WriteLine("");
             }
             Console.ReadKey();
         }
-        
+
 
         static void AssignOrderToMaker(AssignMakerToOrderUseCase assignMakerToOrderUseCase)
         {
