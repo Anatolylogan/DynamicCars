@@ -1,8 +1,9 @@
 ﻿using Domain.Entities;
+using Domain.Сontracts;
 
 namespace Infrastructure.Repository
 {
-    public class ManagerRepository : BaseRepository<Manager>
+    public class ManagerRepository : BaseRepository<Manager>, IManagerRepository
     {
         public ManagerRepository(string filePath) : base(filePath) { }
 

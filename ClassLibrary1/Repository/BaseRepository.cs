@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using Domain.Entities;
-using System.IO;
+using Domain.Сontracts;
 
 namespace Infrastructure.Repository
 {
-    public class BaseRepository<T> : IRepository<T> where T : Entity
+    public abstract class BaseRepository<T> : IRepository<T> where T : class
     {
         private readonly string _filePath;
         protected List<T> Items;
@@ -14,6 +14,7 @@ namespace Infrastructure.Repository
             _filePath = filePath;
             Items = LoadFromFile();
         }
+
         private List<T> LoadFromFile()
         {
             try
@@ -29,10 +30,11 @@ namespace Infrastructure.Repository
             }
             catch (Exception ex)
             {
-                LogError($"Ошибка при чтении файла {_filePath}: {ex.Message}");
+                Console.WriteLine($"Ошибка при чтении файла {_filePath}: {ex.Message}");
                 return new List<T>();
             }
         }
+
         private void SaveToFile()
         {
             try
@@ -42,38 +44,39 @@ namespace Infrastructure.Repository
             }
             catch (Exception ex)
             {
-                LogError($"Ошибка при записи в файл {_filePath}: {ex.Message}");
+                Console.WriteLine($"Ошибка при записи файла {_filePath}: {ex.Message}");
             }
         }
-        private void LogError(string message)
-        {
-            Console.WriteLine($"[Error] {message}");
-        }
+
         public List<T> GetAll()
         {
             return Items;
         }
-        public T? GetById(int id)
-        {
-            return Items.FirstOrDefault(item => item.Id == id);
-        }
+
         public void Add(T item)
         {
             Items.Add(item);
             SaveToFile();
         }
+
         public void Remove(T item)
         {
             Items.Remove(item);
             SaveToFile();
         }
+
+        public T? GetById(int id)
+        {
+            return Items.FirstOrDefault(i => (i as Entity)?.Id == id);
+        }
+
         public void Update(T item)
         {
-            var existingItem = Items.FirstOrDefault(i => i.Id == item.Id);
+            var existingItem = Items.FirstOrDefault(i => (i as Entity)?.Id == (item as Entity)?.Id);
             if (existingItem != null)
             {
-                var index = Items.IndexOf(existingItem);
-                Items[index] = item;
+                Items.Remove(existingItem);
+                Items.Add(item);
                 SaveToFile();
             }
         }

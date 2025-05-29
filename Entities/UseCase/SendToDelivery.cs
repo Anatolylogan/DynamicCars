@@ -1,6 +1,5 @@
 ﻿using Domain.Entities;
-using Infrastructure.Repository;
-
+using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
@@ -8,10 +7,10 @@ namespace Domain.UseCase
     {
         public class SendToDeliveryUseCase
         {
-            private readonly OrderRepository _orderRepository;
-            private readonly DeliveryRepository _deliveryRepository;
+            private readonly IOrderRepository _orderRepository;
+            private readonly IDeliveryRepository _deliveryRepository;
 
-            public SendToDeliveryUseCase(OrderRepository orderRepository, DeliveryRepository deliveryRepository)
+            public SendToDeliveryUseCase(IOrderRepository orderRepository, IDeliveryRepository deliveryRepository)
             {
                 _orderRepository = orderRepository;
                 _deliveryRepository = deliveryRepository;

@@ -1,12 +1,12 @@
-﻿using Infrastructure.Repository;
+﻿using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
     public class CancelOrderUseCase
     {
-        private readonly OrderRepository _orderRepository;
+        private readonly IOrderRepository _orderRepository;
 
-        public CancelOrderUseCase(OrderRepository orderRepository)
+        public CancelOrderUseCase(IOrderRepository orderRepository)
         {
             _orderRepository = orderRepository;
         }

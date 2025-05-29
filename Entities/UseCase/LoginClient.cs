@@ -1,13 +1,13 @@
 ﻿using Domain.Entities;
-using Infrastructure.Repository;
+using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
     public class LoginClientUseCase
     {
-        private readonly ClientRepository _clientRepository;
+        private readonly IClientRepository _clientRepository;
 
-        public LoginClientUseCase(ClientRepository clientRepository)
+        public LoginClientUseCase(IClientRepository clientRepository)
         {
             _clientRepository = clientRepository;
         }

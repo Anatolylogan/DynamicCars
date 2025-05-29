@@ -1,13 +1,13 @@
-﻿using Infrastructure.Repository;
+﻿using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
     public class SendToStoreUseCase
     {
-        private readonly OrderRepository _orderRepository;
-        private readonly StoreRepository _storeRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IStoreRepository _storeRepository;
 
-        public SendToStoreUseCase(OrderRepository orderRepository, StoreRepository storeRepository)
+        public SendToStoreUseCase(IOrderRepository orderRepository, IStoreRepository storeRepository)
         {
             _orderRepository = orderRepository;
             _storeRepository = storeRepository;

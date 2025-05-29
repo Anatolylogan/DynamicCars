@@ -1,13 +1,13 @@
 ﻿using Domain.Entities;
-using Infrastructure.Repository;
+using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
     public class RegisterManagerUseCase
     {
-        private readonly ManagerRepository _managerRepository;
+        private readonly IManagerRepository _managerRepository;
 
-        public RegisterManagerUseCase(ManagerRepository managerRepository)
+        public RegisterManagerUseCase(IManagerRepository managerRepository)
         {
             _managerRepository = managerRepository;
         }

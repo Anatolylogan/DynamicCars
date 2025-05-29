@@ -1,13 +1,13 @@
 ﻿using Domain.Entities;
-using Infrastructure.Repository;
+using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
     public class FilterOrdersByStatusUseCase
     {
-        private readonly OrderRepository _orderRepository;
+        private readonly IOrderRepository _orderRepository;
 
-        public FilterOrdersByStatusUseCase(OrderRepository orderRepository)
+        public FilterOrdersByStatusUseCase(IOrderRepository orderRepository)
         {
             _orderRepository = orderRepository;
         }

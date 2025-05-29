@@ -1,21 +1,21 @@
 ﻿using Domain.Entities;
-using Infrastructure.Repository;
+using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
     public class ManagerService
     {
-        private readonly ManagerRepository managerRepository;
-        private readonly OrderRepository orderRepository;
-        private readonly MakerRepository makerRepository;
-        public ManagerService(OrderRepository orderRepo, MakerRepository makerRepo, ManagerRepository managerRepo)
+        private readonly IManagerRepository managerRepository;
+        private readonly IOrderRepository orderRepository;
+        private readonly IMakerRepository makerRepository;
+        public ManagerService(IOrderRepository orderRepo, IMakerRepository makerRepo, IManagerRepository managerRepo)
         {
             orderRepository = orderRepo;
             makerRepository = makerRepo;
             managerRepository = managerRepo;
         }
 
-        public void AssignMaker(Order order, Maker maker) //Метод для назанчение Maker на заказ
+        public void AssignMaker(Order order, Maker maker)
         {
             order.Maker = maker;
             order.MakerId = maker.Id;

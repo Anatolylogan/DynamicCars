@@ -1,16 +1,16 @@
 ﻿using Domain.Entities;
-using Infrastructure.Repository;
+using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
     public class CompleteMakingUseCase
     {
-        private readonly OrderRepository _orderRepository;
+        private readonly IOrderRepository _orderRepository;
 
         public LogHandler Logger { get; set; }
         public event Action<Order> OrderReady;
 
-        public CompleteMakingUseCase(OrderRepository orderRepository)
+        public CompleteMakingUseCase(IOrderRepository orderRepository)
         {
             _orderRepository = orderRepository;
         }

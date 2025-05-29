@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Entities\Domain.c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console UI", "Console UI\Console UI.csproj", "{6D1743A0-F7D5-43BF-A715-89064F124434}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "ClassLibrary1\Infrastructure.csproj", "{81B062C8-D4BE-4214-B843-3D79C54B976D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebDynamicCars", "WebDynamicCars\WebDynamicCars.csproj", "{9C766DDD-1E52-44D5-85DB-282F8E420C2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{6D1743A0-F7D5-43BF-A715-89064F124434}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D1743A0-F7D5-43BF-A715-89064F124434}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D1743A0-F7D5-43BF-A715-89064F124434}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81B062C8-D4BE-4214-B843-3D79C54B976D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81B062C8-D4BE-4214-B843-3D79C54B976D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81B062C8-D4BE-4214-B843-3D79C54B976D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81B062C8-D4BE-4214-B843-3D79C54B976D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C766DDD-1E52-44D5-85DB-282F8E420C2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C766DDD-1E52-44D5-85DB-282F8E420C2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C766DDD-1E52-44D5-85DB-282F8E420C2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C766DDD-1E52-44D5-85DB-282F8E420C2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

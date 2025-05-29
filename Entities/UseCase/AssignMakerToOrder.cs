@@ -1,13 +1,13 @@
-﻿using Infrastructure.Repository;
+﻿using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
     public class AssignMakerToOrderUseCase
     {
-        private readonly OrderRepository _orderRepository;
-        private readonly MakerRepository _makerRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IMakerRepository _makerRepository;
 
-        public AssignMakerToOrderUseCase(OrderRepository orderRepository, MakerRepository makerRepository)
+        public AssignMakerToOrderUseCase(IOrderRepository orderRepository, IMakerRepository makerRepository)
         {
             _orderRepository = orderRepository;
             _makerRepository = makerRepository;

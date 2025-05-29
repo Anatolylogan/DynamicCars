@@ -1,20 +1,21 @@
-﻿using Domain.Entities;
-using Infrastructure.Repository;
+﻿using System.Net;
+using Domain.Entities;
+using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
     public class RegisterClientUseCase
     {
-        private readonly ClientRepository _clientRepository;
         private readonly IdGenerator _idGenerator;
+        private readonly IRepository<Client> _clientRepository;
 
-        public RegisterClientUseCase(ClientRepository clientRepository, IdGenerator idGenerator)
+        public RegisterClientUseCase(IRepository<Client> clientRepository, IdGenerator idGenerator)
         {
             _clientRepository = clientRepository;
             _idGenerator = idGenerator;
         }
 
-        public Client Execute(string clientName, string phoneNumber)
+        public Client? Execute(string clientName, string phoneNumber)
         {
             if (string.IsNullOrWhiteSpace(clientName))
             {
@@ -28,16 +29,16 @@ namespace Domain.UseCase
 
             int newClientId = _idGenerator.GenerateId();
 
-            var client = new Client
+            var newClient = new Client
             {
                 Id = newClientId,
                 Name = clientName,
                 PhoneNumber = phoneNumber
             };
 
-            _clientRepository.Add(client);
+            _clientRepository.Add(newClient);
 
-            return client;
+            return newClient;
         }
     }
 }

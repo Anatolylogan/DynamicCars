@@ -1,8 +1,9 @@
 ﻿using Domain.Entities;
+using Domain.Сontracts;
 
 namespace Infrastructure.Repository
 {
-    public class OrderRepository : BaseRepository<Order>
+    public class OrderRepository : BaseRepository<Order>, IOrderRepository
     {
         public OrderRepository(string filePath) : base(filePath) { }
 

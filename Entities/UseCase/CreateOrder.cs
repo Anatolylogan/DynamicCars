@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.UseCase;
-using Infrastructure.Repository;
+using Domain.Сontracts;
 
 public class CreateOrderUseCase
 {
@@ -8,9 +8,10 @@ public class CreateOrderUseCase
     private readonly IRepository<Order> _orderRepository;
     private readonly IRepository<Client> _clientRepository;
 
+
     public LogHandler Logger { get; set; }
 
-    public CreateOrderUseCase(OrderRepository orderRepository, ClientRepository clientRepository, IdGenerator idGenerator)
+    public CreateOrderUseCase(IOrderRepository orderRepository, IClientRepository clientRepository, IdGenerator idGenerator)
     {
         _orderRepository = orderRepository;
         _clientRepository = clientRepository;
@@ -35,8 +36,8 @@ public class CreateOrderUseCase
                 Status = OrderStatus.New,
                 CarBrand = choice.carBrand,
                 CarpetColor = choice.color,
-                DeliveryDetails = deliveryOption.GetDeliveryDetails(),  
-                DeliveryCost = deliveryOption.GetCost()                
+                DeliveryDetails = deliveryOption.GetDeliveryDetails(),
+                DeliveryCost = deliveryOption.GetCost()
             };
             order.Items.Add(new OrderItem
             {
@@ -47,7 +48,7 @@ public class CreateOrderUseCase
             _orderRepository.Add(order);
 
             Logger?.Invoke($"Создан заказ: ID {order.Id}, клиент {clientId}, автомобиль {choice.carBrand}, цвет {choice.color}");
-            Logger?.Invoke($"Способ доставки: {order.DeliveryDetails}, Стоимость доставки: {order.DeliveryCost}");  // Логируем данные доставки
+            Logger?.Invoke($"Способ доставки: {order.DeliveryDetails}, Стоимость доставки: {order.DeliveryCost}");
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Infrastructure.Repository;
 using Domain.UseCase;
 using Domain.UseCase.Domain.UseCase;
-using Domain.Entities;
 
 namespace ConsoleApp
 {
@@ -9,23 +8,17 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            string itemsFilePath = "items.json";
-            string clientsFilePath = "clients.json";
-            string makersFilePath = "makers.json";
-            string deliveriesFilePath = "deliveries.json";
-            string managersFilePath = "managers.json";
-
-            var clientRepository = new ClientRepository(clientsFilePath);
-            var makerRepository = new MakerRepository(makersFilePath);
-            var orderRepository = new OrderRepository(itemsFilePath);
-            var storeRepository = new StoreRepository();
-            var deliveryRepository = new DeliveryRepository(deliveriesFilePath);
-            var pricingRepository = new PricingRepository();
+            var clientRepository = new ClientRepository("clients.json");
+            var makerRepository = new MakerRepository("makers.json");
+            var orderRepository = new OrderRepository("orders.json");
+            var storeRepository = new StoreRepository("store.json");
+            var deliveryRepository = new DeliveryRepository("delivery.json");
+            var pricingRepository = new PricingRepository("pricing.json");
+            var managerRepository = new ManagerRepository("manager.json");
 
             var calculateOrderCostUseCase = new CalculateOrderCostUseCase(pricingRepository);
             var filterOrdersByStatusUseCase = new FilterOrdersByStatusUseCase(orderRepository);
             var notificationService = new NotificationService();
-            var managerRepository = new ManagerRepository(managersFilePath);
             var loginClientUseCase = new LoginClientUseCase(clientRepository);
             var assignMakerToOrderUseCase = new AssignMakerToOrderUseCase(orderRepository, makerRepository);
             var cancelOrderUseCase = new CancelOrderUseCase(orderRepository);
@@ -55,7 +48,7 @@ namespace ConsoleApp
                 Logger = Logger.LogToConsole
             };
             var registerClientUseCase = new RegisterClientUseCase(clientRepository, idGenerator);
-
+            
 
 
             bool exit = false;
@@ -69,7 +62,7 @@ namespace ConsoleApp
                 Console.WriteLine("2. Меню менеджера");
                 Console.WriteLine("3. Выход");
                 Console.Write("Выберите опцию: ");
-                string choice = Console.ReadLine();
+                string? choice = Console.ReadLine();
 
                 switch (choice)
                 {
@@ -104,7 +97,7 @@ namespace ConsoleApp
                 Console.WriteLine("5. Отменить заказ");
                 Console.WriteLine("6. Назад");
                 Console.Write("Выберите опцию: ");
-                string choice = Console.ReadLine();
+                string? choice = Console.ReadLine();
 
                 switch (choice)
                 {
@@ -136,9 +129,9 @@ namespace ConsoleApp
         static void RegisterClient(RegisterClientUseCase registerClientUseCase)
         {
             Console.Write("Введите имя клиента: ");
-            string clientName = Console.ReadLine();
+            string? clientName = Console.ReadLine();
             Console.WriteLine("Ввидеите номер телефона(Пример<+7(999)-999-99-99>)");
-            string phoneNumber = Console.ReadLine();
+            string? phoneNumber = Console.ReadLine();
             var client = registerClientUseCase.Execute(clientName, phoneNumber);
             Console.WriteLine($"Клиент {client.Name} успешно зарегистрирован с ID {client.Id}");
             Console.ReadKey();
@@ -397,7 +390,6 @@ namespace ConsoleApp
             Console.WriteLine($"Заказ с ID {orderId} отправлен на склад.");
             Console.ReadKey();
         }
-
         static void SendToDelivery(SendToDeliveryUseCase sendToDeliveryUseCase)
         {
             Console.Write("Введите ID заказа для отправки на доставку: ");

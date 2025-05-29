@@ -1,5 +1,5 @@
 ﻿using Domain.Entities;
-using Infrastructure.Repository;
+using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
@@ -8,7 +8,7 @@ namespace Domain.UseCase
         private readonly ICostCalculator _basicCostCalculator;
         private readonly ICostCalculator _discountedCostCalculator;
 
-        public CalculateOrderCostUseCase(PricingRepository pricingRepository)
+        public CalculateOrderCostUseCase(IPricingRepository pricingRepository)
         {
             _basicCostCalculator = new BasicCostCalculator(pricingRepository);
             _discountedCostCalculator = new DiscountedCostCalculator(pricingRepository);

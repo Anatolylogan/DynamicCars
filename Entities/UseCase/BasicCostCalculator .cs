@@ -1,13 +1,13 @@
 ﻿using Domain.Entities;
-using Infrastructure.Repository;
+using Domain.Сontracts;
 
 namespace Domain.UseCase
 {
     public class BasicCostCalculator : ICostCalculator
     {
-        private readonly PricingRepository _pricing;
+        private readonly IPricingRepository _pricing;
 
-        public BasicCostCalculator(PricingRepository pricing)
+        public BasicCostCalculator(IPricingRepository pricing)
         {
             _pricing = pricing;
         }
