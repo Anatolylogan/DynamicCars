@@ -22,7 +22,7 @@ namespace DynamicCarsNew.Controllers
         {
             IDeliveryOption deliveryOption = request.DeliveryType.ToLower() switch
             {
-                "pickup" => new PickupOption(),
+                "Самовывоз" => new PickupOption(),
                 _ => throw new ArgumentException("Неверный тип доставки")
             };
 

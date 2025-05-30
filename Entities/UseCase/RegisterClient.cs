@@ -7,14 +7,13 @@ namespace Domain.UseCase
     public class RegisterClientUseCase
     {
         private readonly IdGenerator _idGenerator;
-        private readonly IRepository<Client> _clientRepository;
+        private readonly IClientRepository _clientRepository;
 
-        public RegisterClientUseCase(IRepository<Client> clientRepository, IdGenerator idGenerator)
+        public RegisterClientUseCase(IClientRepository clientRepository, IdGenerator idGenerator)
         {
             _clientRepository = clientRepository;
             _idGenerator = idGenerator;
         }
-
         public Client? Execute(string clientName, string phoneNumber)
         {
             if (string.IsNullOrWhiteSpace(clientName))
