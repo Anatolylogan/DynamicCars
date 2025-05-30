@@ -2,6 +2,7 @@ using Domain.UseCase;
 using Domain.Ñontracts;
 using DynamicCarsNew.Infrastructure;
 using Infrastructure.Repository;
+using WebDynamicCars.Session;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,8 @@ builder.Services.AddSingleton<IdGenerator>();
 builder.Services.AddScoped<CreateOrderUseCase>();
 builder.Services.AddTransient<IDeliveryOption, PickupOption>();
 builder.Services.AddScoped<RegisterClientUseCase>();
+builder.Services.AddScoped<LoginClientUseCase>();
+builder.Services.AddSingleton<ClientSessionService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

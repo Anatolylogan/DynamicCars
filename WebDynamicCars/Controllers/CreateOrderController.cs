@@ -2,6 +2,7 @@
 using Domain.UseCase;
 using DynamicCarsNew.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
+using WebDynamicCars.Session;
 
 
 namespace DynamicCarsNew.Controllers
@@ -11,33 +12,36 @@ namespace DynamicCarsNew.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly CreateOrderUseCase _createOrderUseCase;
-
-        public OrdersController(CreateOrderUseCase createOrderUseCase)
+        private readonly ClientSessionService _clientSession;
+        public OrdersController(CreateOrderUseCase createOrderUseCase, ClientSessionService clientSession)
         {
             _createOrderUseCase = createOrderUseCase;
+            _clientSession = clientSession;
         }
 
-        [HttpPost]
+        [HttpPost("create")]
         public IActionResult CreateOrder([FromBody] CreateOrderRequest request)
         {
-            IDeliveryOption deliveryOption = request.DeliveryType.ToLower() switch
+            if (!_clientSession.IsLoggedIn())
             {
-                "Самовывоз" => new PickupOption(),
-                _ => throw new ArgumentException("Неверный тип доставки")
-            };
+                return Unauthorized(new { error = "Вы должны войти как клиент, чтобы создать заказ." });
+            }
 
-            var matChoices = request.MatChoices
-                .Select(mc => (mc.Color, mc.CarBrand))
-                .ToList();
+            var clientId = _clientSession.GetCurrentClientId()!.Value;
 
             try
             {
-                _createOrderUseCase.Execute(request.ClientId, matChoices, deliveryOption);
-                return Ok("Заказ создан успешно.");
+                var matChoicesTuples = request.MatChoices
+                    .Select(m => (m.Color, m.CarBrand))
+                    .ToList();
+
+                _createOrderUseCase.Execute(clientId, matChoicesTuples, new PickupOption());
+
+                return Ok(new { message = "Заказ успешно создан." });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { error = ex.Message });
             }
         }
     }
