@@ -21,6 +21,7 @@ builder.Services.AddTransient<IDeliveryOption, PickupOption>();
 builder.Services.AddScoped<RegisterClientUseCase>();
 builder.Services.AddScoped<LoginClientUseCase>();
 builder.Services.AddSingleton<ClientSessionService>();
+builder.Services.AddScoped<CancelOrderUseCase>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
