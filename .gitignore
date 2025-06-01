@@ -364,3 +364,4 @@ FodyWeavers.xsd
 # Игнорировать файлы данных клиентов и заказов
 /WebDynamicCars/clients.*
 /WebDynamicCars/orders.*
+/WebDynamicCars/manager.*

@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using Domain.UseCase;
 using Domain.Ñontracts;
 using DynamicCarsNew.Infrastructure;
@@ -7,14 +8,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 var ordersFilePath = builder.Configuration["DataFiles:Orders"];
 var clientsFilePath = builder.Configuration["DataFiles:Clients"];
+var managersFilePath = builder.Configuration["DataFiles:Managers"];
 
 builder.Services.AddScoped<IOrderRepository>(_ => new OrderRepository(ordersFilePath));
 builder.Services.AddScoped<IClientRepository>(_ => new ClientRepository(clientsFilePath));
+builder.Services.AddSingleton<IManagerRepository>(_ => new ManagerRepository(managersFilePath));
 
 builder.Services.AddScoped<CreateOrderUseCase>();
 builder.Services.AddScoped<CancelOrderUseCase>();
 builder.Services.AddScoped<RegisterClientUseCase>();
 builder.Services.AddScoped<LoginClientUseCase>();
+builder.Services.AddScoped<RegisterManagerUseCase>();
+builder.Services.AddScoped<LoginManagerUseCase>();
+
 
 builder.Services.AddSingleton<IdGenerator>();
 builder.Services.AddTransient<IDeliveryOption, PickupOption>();

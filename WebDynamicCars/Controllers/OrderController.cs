@@ -12,10 +12,11 @@ namespace WebDynamicCars.Controllers
     {
         private readonly CreateOrderUseCase _createOrderUseCase;
         private readonly CancelOrderUseCase _cancelOrderUseCase;
-
+    
         public OrderController(
             CreateOrderUseCase createOrderUseCase,
-            CancelOrderUseCase cancelOrderUseCase)
+            CancelOrderUseCase cancelOrderUseCase,
+            FilterOrdersByStatusUseCase filterOrdersByStatusUseCase)
         {
             _createOrderUseCase = createOrderUseCase;
             _cancelOrderUseCase = cancelOrderUseCase;
