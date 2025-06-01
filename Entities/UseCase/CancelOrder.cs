@@ -1,4 +1,6 @@
-﻿using Domain.Сontracts;
+﻿using Domain.Entities;
+using Domain.Сontracts;
+using System;
 
 namespace Domain.UseCase
 {
@@ -11,22 +13,27 @@ namespace Domain.UseCase
             _orderRepository = orderRepository;
         }
 
-        public void Execute(int orderId, int clientId)
+        public Order Execute(int orderId, int clientId)
         {
             var order = _orderRepository.GetById(orderId);
             if (order == null)
             {
-                throw new Exception("Заказ не найден.");
+                throw new KeyNotFoundException("Заказ не найден.");
             }
+
             if (order.ClientId != clientId)
             {
-                throw new Exception("Этот заказ не принадлежит указанному клиенту.");
+                throw new InvalidOperationException("Этот заказ не принадлежит указанному клиенту.");
             }
+
             _orderRepository.Delete(order);
 
             Console.WriteLine($"Заказ с ID {orderId} успешно отменен.");
+
+            return order;
         }
     }
 }
+
 
 
