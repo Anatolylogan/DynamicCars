@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Application\Applictaion.csproj" />
     <ProjectReference Include="..\ClassLibrary1\Infrastructure.csproj" />
-    <ProjectReference Include="..\Console UI\Console UI.csproj" />
-    <ProjectReference Include="..\Entities\Applictaion.csproj" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
