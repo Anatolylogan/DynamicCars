@@ -17,6 +17,7 @@ public class ManagersController : ControllerBase
     private readonly CompleteMakingUseCase _completeMakingUseCase;
     private readonly SendToStoreUseCase _sendToStoreUseCase;
     private readonly SendToDeliveryUseCase _sendToDeliveryUseCase;
+    private readonly FilterOrdersByStatusUseCase _filterOrdersByStatusUseCase;
 
     public ManagersController(
      RegisterManagerUseCase registerManagerUseCase,
@@ -26,7 +27,8 @@ public class ManagersController : ControllerBase
      AssignMakerToOrderUseCase assignMakerToOrderUseCase,
      CompleteMakingUseCase completeMakingUseCase,
      SendToStoreUseCase sendToStoreUseCase, 
-     SendToDeliveryUseCase sendToDeliveryUseCase)
+     SendToDeliveryUseCase sendToDeliveryUseCase,
+     FilterOrdersByStatusUseCase filterOrdersByStatusUseCase)
     {
         _registerManagerUseCase = registerManagerUseCase;
         _loginManagerUseCase = loginManagerUseCase;
@@ -36,6 +38,7 @@ public class ManagersController : ControllerBase
         _completeMakingUseCase = completeMakingUseCase;
         _sendToStoreUseCase = sendToStoreUseCase;
         _sendToDeliveryUseCase = sendToDeliveryUseCase;
+        _filterOrdersByStatusUseCase = filterOrdersByStatusUseCase; 
     }
 
     [HttpPost("register")]
@@ -170,6 +173,18 @@ public class ManagersController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
+    [HttpPost("orders/by/status")]
+    public IActionResult GetOrdersByStatus([FromBody] FilterOrdersRequest request)
+    {
+        if (!Enum.IsDefined(typeof(OrderStatus), request.Status))
+        {
+            return BadRequest(new { error = "Недопустимый статус заказа." });
+        }
+
+        var orders = _filterOrdersByStatusUseCase.Execute(request.Status);
+        return Ok(orders);
+    }
+
 }
 
 

@@ -73,6 +73,12 @@ namespace WebDynamicCars.Controllers
                 return Conflict(new { error = ex.Message });
             }
         }
+        [HttpGet("order/statuses")]
+        public IActionResult GetOrderStatuses()
+        {
+            var statuses = Enum.GetNames(typeof(OrderStatus));
+            return Ok(statuses);
+        }
     }
 }
 
