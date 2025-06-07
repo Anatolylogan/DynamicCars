@@ -1,4 +1,5 @@
 using Domain.UseCase;
+using Domain.UseCase.Domain.UseCase;
 using Domain.Ñontracts;
 using DynamicCarsNew.Infrastructure;
 using Infrastructure.Configuration;
@@ -18,6 +19,7 @@ builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddSingleton<IManagerRepository, ManagerRepository>();
 builder.Services.AddScoped<IMakerRepository, MakerRepository>();
 builder.Services.AddScoped<IStoreRepository, StoreRepository>();
+builder.Services.AddScoped<IDeliveryRepository, DeliveryRepository>();
 
 builder.Services.AddScoped<CreateOrderUseCase>();
 builder.Services.AddScoped<CancelOrderUseCase>();
@@ -29,6 +31,7 @@ builder.Services.AddScoped<FilterOrdersByStatusUseCase>();
 builder.Services.AddScoped<AssignMakerToOrderUseCase>();
 builder.Services.AddScoped<CompleteMakingUseCase>();
 builder.Services.AddScoped<SendToStoreUseCase>();
+builder.Services.AddScoped<SendToDeliveryUseCase>();
 
 
 builder.Services.AddSingleton<IdGenerator>();

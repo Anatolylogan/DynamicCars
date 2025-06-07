@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Domain.UseCase;
+using Domain.UseCase.Domain.UseCase;
 using Domain.Сontracts;
 using Microsoft.AspNetCore.Mvc;
 using WebUI.Models.Requests;
@@ -15,6 +16,7 @@ public class ManagersController : ControllerBase
     private readonly AssignMakerToOrderUseCase _assignMakerToOrderUseCase;
     private readonly CompleteMakingUseCase _completeMakingUseCase;
     private readonly SendToStoreUseCase _sendToStoreUseCase;
+    private readonly SendToDeliveryUseCase _sendToDeliveryUseCase;
 
     public ManagersController(
      RegisterManagerUseCase registerManagerUseCase,
@@ -23,7 +25,8 @@ public class ManagersController : ControllerBase
      IClientRepository clientRepository,
      AssignMakerToOrderUseCase assignMakerToOrderUseCase,
      CompleteMakingUseCase completeMakingUseCase,
-     SendToStoreUseCase sendToStoreUseCase)
+     SendToStoreUseCase sendToStoreUseCase, 
+     SendToDeliveryUseCase sendToDeliveryUseCase)
     {
         _registerManagerUseCase = registerManagerUseCase;
         _loginManagerUseCase = loginManagerUseCase;
@@ -32,6 +35,7 @@ public class ManagersController : ControllerBase
         _assignMakerToOrderUseCase = assignMakerToOrderUseCase;
         _completeMakingUseCase = completeMakingUseCase;
         _sendToStoreUseCase = sendToStoreUseCase;
+        _sendToDeliveryUseCase = sendToDeliveryUseCase;
     }
 
     [HttpPost("register")]
@@ -150,7 +154,24 @@ public class ManagersController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
+    [HttpPost("send/to/delivery")]
+    public IActionResult SendToDelivery([FromBody] SendToDeliveryRequest request)
+    {
+        if (request.OrderId <= 0 || string.IsNullOrWhiteSpace(request.Address))
+            return BadRequest("Неверные данные запроса.");
+
+        try
+        {
+            _sendToDeliveryUseCase.Execute(request.OrderId, request.Address);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }
+
 
 
 
