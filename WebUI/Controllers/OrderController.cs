@@ -12,6 +12,7 @@ namespace WebDynamicCars.Controllers
     {
         private readonly CreateOrderUseCase _createOrderUseCase;
         private readonly CancelOrderUseCase _cancelOrderUseCase;
+        private readonly FilterOrdersByStatusUseCase _filterOrdersByStatusUseCase;
 
         public OrderController(
             CreateOrderUseCase createOrderUseCase,
@@ -20,6 +21,7 @@ namespace WebDynamicCars.Controllers
         {
             _createOrderUseCase = createOrderUseCase;
             _cancelOrderUseCase = cancelOrderUseCase;
+            _filterOrdersByStatusUseCase = filterOrdersByStatusUseCase;
         }
 
         [HttpPost("create")]

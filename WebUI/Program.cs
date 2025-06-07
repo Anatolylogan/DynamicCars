@@ -1,10 +1,8 @@
-using System.Threading.RateLimiting;
 using Domain.UseCase;
 using Domain.Ñontracts;
 using DynamicCarsNew.Infrastructure;
 using Infrastructure.Configuration;
 using Infrastructure.Repository;
-using WebUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +24,7 @@ builder.Services.AddScoped<RegisterClientUseCase>();
 builder.Services.AddScoped<LoginClientUseCase>();
 builder.Services.AddScoped<RegisterManagerUseCase>();
 builder.Services.AddScoped<LoginManagerUseCase>();
+builder.Services.AddScoped<FilterOrdersByStatusUseCase>();
 
 
 builder.Services.AddSingleton<IdGenerator>();

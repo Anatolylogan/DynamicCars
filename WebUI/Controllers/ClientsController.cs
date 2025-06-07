@@ -37,7 +37,6 @@ namespace WebDynamicCars.Controllers
         }
 
         [HttpGet("login/{clientId}")]
-        [HttpGet("{clientId}")]
         public IActionResult Login(int clientId)
         {
             try

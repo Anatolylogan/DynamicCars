@@ -1,5 +1,8 @@
-﻿using Domain.UseCase;
+﻿using System.Reflection;
+using Domain.UseCase;
+using Domain.Сontracts;
 using Microsoft.AspNetCore.Mvc;
+using WebUI.Models.Requests;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -7,13 +10,20 @@ public class ManagersController : ControllerBase
 {
     private readonly RegisterManagerUseCase _registerManagerUseCase;
     private readonly LoginManagerUseCase _loginManagerUseCase;
+    private readonly IOrderRepository _orderRepository;
+    private readonly IClientRepository _clientRepository;
+
 
     public ManagersController(
-        RegisterManagerUseCase registerManagerUseCase,
-        LoginManagerUseCase loginManagerUseCase)
+     RegisterManagerUseCase registerManagerUseCase,
+     LoginManagerUseCase loginManagerUseCase,
+     IOrderRepository orderRepository,
+     IClientRepository clientRepository)
     {
         _registerManagerUseCase = registerManagerUseCase;
         _loginManagerUseCase = loginManagerUseCase;
+        _orderRepository = orderRepository;
+        _clientRepository = clientRepository;
     }
 
     [HttpPost("register")]
@@ -55,5 +65,32 @@ public class ManagersController : ControllerBase
         {
             return BadRequest(new { error = ex.Message });
         }
+    }
+    [HttpGet("orders")]
+    public IActionResult GetOrders()
+    {
+        var orders = _orderRepository.GetAll();
+
+        if (!orders.Any())
+            return NotFound("Список заказов пуст.");
+
+        var result = orders.Select(order =>
+        {
+            var client = _clientRepository.GetById(order.ClientId);
+            return new OrderResponse
+            {
+                OrderId = order.Id,
+                ClientId = order.ClientId,
+                ClientName = client?.Name ?? "Неизвестный клиент",
+                ClientPhone = client?.PhoneNumber ?? "Неизвестный номер телефона",
+                CarBrand = order.Items.FirstOrDefault()?.CarBrand ?? "Не задан",
+                CarpetColor = order.Items.FirstOrDefault()?.CarpetColor ?? "Не задан",
+                DeliveryDetails = order.DeliveryDetails,
+                DeliveryCost = order.DeliveryCost,
+                Status = order.Status.ToString()
+            };
+        }).ToList();
+
+        return Ok(result);
     }
 }
