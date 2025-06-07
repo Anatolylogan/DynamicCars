@@ -27,6 +27,7 @@ builder.Services.AddScoped<RegisterManagerUseCase>();
 builder.Services.AddScoped<LoginManagerUseCase>();
 builder.Services.AddScoped<FilterOrdersByStatusUseCase>();
 builder.Services.AddScoped<AssignMakerToOrderUseCase>();
+builder.Services.AddScoped<CompleteMakingUseCase>();
 
 
 builder.Services.AddSingleton<IdGenerator>();

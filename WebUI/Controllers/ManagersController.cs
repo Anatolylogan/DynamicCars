@@ -13,21 +13,22 @@ public class ManagersController : ControllerBase
     private readonly IOrderRepository _orderRepository;
     private readonly IClientRepository _clientRepository;
     private readonly AssignMakerToOrderUseCase _assignMakerToOrderUseCase;
-
-
+    private readonly CompleteMakingUseCase _completeMakingUseCase;
 
     public ManagersController(
      RegisterManagerUseCase registerManagerUseCase,
      LoginManagerUseCase loginManagerUseCase,
      IOrderRepository orderRepository,
      IClientRepository clientRepository,
-     AssignMakerToOrderUseCase assignMakerToOrderUseCase)
+     AssignMakerToOrderUseCase assignMakerToOrderUseCase,
+     CompleteMakingUseCase completeMakingUseCase)
     {
         _registerManagerUseCase = registerManagerUseCase;
         _loginManagerUseCase = loginManagerUseCase;
         _orderRepository = orderRepository;
         _clientRepository = clientRepository;
         _assignMakerToOrderUseCase = assignMakerToOrderUseCase;
+        _completeMakingUseCase = completeMakingUseCase;
     }
 
     [HttpPost("register")]
@@ -114,5 +115,23 @@ public class ManagersController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
+    [HttpPost("complete/order")]
+    public IActionResult CompleteOrder([FromBody] CompleteOrderRequest request)
+    {
+        if (request.OrderId <= 0 || string.IsNullOrWhiteSpace(request.ClientEmail))
+            return BadRequest("Некорректные данные для завершения заказа.");
+
+        try
+        {
+            _completeMakingUseCase.Execute(request.OrderId, request.ClientEmail);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }
+
+
 
