@@ -1,10 +1,14 @@
 ﻿using Domain.Entities;
 using Domain.Сontracts;
+using Infrastructure.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Repository
 {
     public class ManagerRepository : BaseRepository<Manager>, IManagerRepository
     {
+        public ManagerRepository(IOptions<RepositorySettings> options)
+            : base(options.Value.ManagersFilePath) { }
         public ManagerRepository(string filePath) : base(filePath) { }
 
         public Manager? GetByName(string name)

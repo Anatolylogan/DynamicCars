@@ -37,6 +37,7 @@ namespace WebDynamicCars.Controllers
         }
 
         [HttpGet("login/{clientId}")]
+        [HttpGet("{clientId}")]
         public IActionResult Login(int clientId)
         {
             try
@@ -47,10 +48,6 @@ namespace WebDynamicCars.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
             }
         }
     }

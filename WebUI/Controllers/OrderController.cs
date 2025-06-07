@@ -12,7 +12,7 @@ namespace WebDynamicCars.Controllers
     {
         private readonly CreateOrderUseCase _createOrderUseCase;
         private readonly CancelOrderUseCase _cancelOrderUseCase;
-    
+
         public OrderController(
             CreateOrderUseCase createOrderUseCase,
             CancelOrderUseCase cancelOrderUseCase,
@@ -59,8 +59,8 @@ namespace WebDynamicCars.Controllers
 
             try
             {
-                var canceledOrder = _cancelOrderUseCase.Execute(orderId, clientId);
-                return Ok(canceledOrder);
+                _cancelOrderUseCase.Execute(orderId, clientId);
+                return Ok();
             }
             catch (KeyNotFoundException ex)
             {
@@ -70,10 +70,7 @@ namespace WebDynamicCars.Controllers
             {
                 return Conflict(new { error = ex.Message });
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
-            }
         }
     }
 }
+

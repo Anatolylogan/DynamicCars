@@ -2,17 +2,23 @@ using System.Threading.RateLimiting;
 using Domain.UseCase;
 using Domain.Ñontracts;
 using DynamicCarsNew.Infrastructure;
+using Infrastructure.Configuration;
 using Infrastructure.Repository;
+using WebUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<RepositorySettings>(
+    builder.Configuration.GetSection("RepositorySettings")
+);
 var ordersFilePath = builder.Configuration["DataFiles:Orders"];
 var clientsFilePath = builder.Configuration["DataFiles:Clients"];
 var managersFilePath = builder.Configuration["DataFiles:Managers"];
 
-builder.Services.AddScoped<IOrderRepository>(_ => new OrderRepository(ordersFilePath));
-builder.Services.AddScoped<IClientRepository>(_ => new ClientRepository(clientsFilePath));
-builder.Services.AddSingleton<IManagerRepository>(_ => new ManagerRepository(managersFilePath));
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddSingleton<IManagerRepository, ManagerRepository>();
+
 
 builder.Services.AddScoped<CreateOrderUseCase>();
 builder.Services.AddScoped<CancelOrderUseCase>();
