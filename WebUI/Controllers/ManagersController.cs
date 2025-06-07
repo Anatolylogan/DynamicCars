@@ -12,18 +12,22 @@ public class ManagersController : ControllerBase
     private readonly LoginManagerUseCase _loginManagerUseCase;
     private readonly IOrderRepository _orderRepository;
     private readonly IClientRepository _clientRepository;
+    private readonly AssignMakerToOrderUseCase _assignMakerToOrderUseCase;
+
 
 
     public ManagersController(
      RegisterManagerUseCase registerManagerUseCase,
      LoginManagerUseCase loginManagerUseCase,
      IOrderRepository orderRepository,
-     IClientRepository clientRepository)
+     IClientRepository clientRepository,
+     AssignMakerToOrderUseCase assignMakerToOrderUseCase)
     {
         _registerManagerUseCase = registerManagerUseCase;
         _loginManagerUseCase = loginManagerUseCase;
         _orderRepository = orderRepository;
         _clientRepository = clientRepository;
+        _assignMakerToOrderUseCase = assignMakerToOrderUseCase;
     }
 
     [HttpPost("register")]
@@ -93,4 +97,22 @@ public class ManagersController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPost("assign/maker")]
+    public IActionResult AssignMaker([FromBody] AssignMakerRequest request)
+    {
+        if (request.OrderId <= 0 || string.IsNullOrWhiteSpace(request.Name))
+            return BadRequest("Некорректные данные для назначения изготовителя.");
+
+        try
+        {
+            _assignMakerToOrderUseCase.Execute(request.OrderId, request.Name);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }
+

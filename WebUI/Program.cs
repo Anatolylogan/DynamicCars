@@ -16,6 +16,7 @@ var managersFilePath = builder.Configuration["DataFiles:Managers"];
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddSingleton<IManagerRepository, ManagerRepository>();
+builder.Services.AddScoped<IMakerRepository, MakerRepository>();
 
 
 builder.Services.AddScoped<CreateOrderUseCase>();
@@ -25,6 +26,7 @@ builder.Services.AddScoped<LoginClientUseCase>();
 builder.Services.AddScoped<RegisterManagerUseCase>();
 builder.Services.AddScoped<LoginManagerUseCase>();
 builder.Services.AddScoped<FilterOrdersByStatusUseCase>();
+builder.Services.AddScoped<AssignMakerToOrderUseCase>();
 
 
 builder.Services.AddSingleton<IdGenerator>();
