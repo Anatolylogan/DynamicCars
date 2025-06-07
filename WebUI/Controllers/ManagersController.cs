@@ -14,6 +14,7 @@ public class ManagersController : ControllerBase
     private readonly IClientRepository _clientRepository;
     private readonly AssignMakerToOrderUseCase _assignMakerToOrderUseCase;
     private readonly CompleteMakingUseCase _completeMakingUseCase;
+    private readonly SendToStoreUseCase _sendToStoreUseCase;
 
     public ManagersController(
      RegisterManagerUseCase registerManagerUseCase,
@@ -21,7 +22,8 @@ public class ManagersController : ControllerBase
      IOrderRepository orderRepository,
      IClientRepository clientRepository,
      AssignMakerToOrderUseCase assignMakerToOrderUseCase,
-     CompleteMakingUseCase completeMakingUseCase)
+     CompleteMakingUseCase completeMakingUseCase,
+     SendToStoreUseCase sendToStoreUseCase)
     {
         _registerManagerUseCase = registerManagerUseCase;
         _loginManagerUseCase = loginManagerUseCase;
@@ -29,6 +31,7 @@ public class ManagersController : ControllerBase
         _clientRepository = clientRepository;
         _assignMakerToOrderUseCase = assignMakerToOrderUseCase;
         _completeMakingUseCase = completeMakingUseCase;
+        _sendToStoreUseCase = sendToStoreUseCase;
     }
 
     [HttpPost("register")]
@@ -131,7 +134,24 @@ public class ManagersController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
+    [HttpPost("send/to/store")]
+    public IActionResult SendToStore([FromBody] SendToStoreRequest request)
+    {
+        if (request.OrderId <= 0)
+            return BadRequest("Некорректный идентификатор заказа.");
+
+        try
+        {
+            _sendToStoreUseCase.Execute(request.OrderId);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }
+
 
 
 
