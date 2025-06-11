@@ -1,60 +1,62 @@
-﻿using Domain.Entities;
-using Domain.UseCase;
-using Domain.Сontracts;
+﻿using Application.Entities;
+using Application.UseCase;
+using Application.Сontracts;
 using System.Collections.Generic;
-
-public class CreateOrderUseCase
+namespace Application.UseCase
 {
-    private readonly IdGenerator _idGenerator;
-    private readonly IRepository<Order> _orderRepository;
-    private readonly IRepository<Client> _clientRepository;
-
-    public LogHandler Logger { get; set; }
-
-    public CreateOrderUseCase(IOrderRepository orderRepository, IClientRepository clientRepository, IdGenerator idGenerator)
+    public class CreateOrderUseCase
     {
-        _orderRepository = orderRepository;
-        _clientRepository = clientRepository;
-        _idGenerator = idGenerator;
-    }
+        private readonly IdGenerator _idGenerator;
+        private readonly IRepository<Order> _orderRepository;
+        private readonly IRepository<Client> _clientRepository;
 
-    public List<Order> Execute(int clientId, List<(string color, string carBrand)> matChoices, IDeliveryOption deliveryOption)
-    {
-        var client = _clientRepository.GetById(clientId);
-        if (client == null)
+        public LogHandler Logger { get; set; }
+
+        public CreateOrderUseCase(IOrderRepository orderRepository, IClientRepository clientRepository, IdGenerator idGenerator)
         {
-            Logger?.Invoke($"Ошибка: клиент с ID {clientId} не найден.");
-            throw new KeyNotFoundException("Клиент не найден.");
+            _orderRepository = orderRepository;
+            _clientRepository = clientRepository;
+            _idGenerator = idGenerator;
         }
 
-        var createdOrders = new List<Order>();
-
-        foreach (var choice in matChoices)
+        public List<Order> Execute(int clientId, List<(string color, string carBrand)> matChoices, IDeliveryOption deliveryOption)
         {
-            var order = new Order
+            var client = _clientRepository.GetById(clientId);
+            if (client == null)
             {
-                Id = _idGenerator.GenerateId(),
-                ClientId = clientId,
-                Status = OrderStatus.New,
-                CarBrand = choice.carBrand,
-                CarpetColor = choice.color,
-                DeliveryDetails = deliveryOption.GetDeliveryDetails(),
-                DeliveryCost = deliveryOption.GetCost()
-            };
-            order.Items.Add(new OrderItem
+                Logger?.Invoke($"Ошибка: клиент с ID {clientId} не найден.");
+                throw new KeyNotFoundException("Клиент не найден.");
+            }
+
+            var createdOrders = new List<Order>();
+
+            foreach (var choice in matChoices)
             {
-                CarBrand = choice.carBrand,
-                CarpetColor = choice.color,
-            });
+                var order = new Order
+                {
+                    Id = _idGenerator.GenerateId(),
+                    ClientId = clientId,
+                    Status = OrderStatus.New,
+                    CarBrand = choice.carBrand,
+                    CarpetColor = choice.color,
+                    DeliveryDetails = deliveryOption.GetDeliveryDetails(),
+                    DeliveryCost = deliveryOption.GetCost()
+                };
+                order.Items.Add(new OrderItem
+                {
+                    CarBrand = choice.carBrand,
+                    CarpetColor = choice.color,
+                });
 
-            _orderRepository.Add(order);
+                _orderRepository.Add(order);
 
-            Logger?.Invoke($"Создан заказ: ID {order.Id}, клиент {clientId}, автомобиль {choice.carBrand}, цвет {choice.color}");
-            Logger?.Invoke($"Способ доставки: {order.DeliveryDetails}, Стоимость доставки: {order.DeliveryCost}");
+                Logger?.Invoke($"Создан заказ: ID {order.Id}, клиент {clientId}, автомобиль {choice.carBrand}, цвет {choice.color}");
+                Logger?.Invoke($"Способ доставки: {order.DeliveryDetails}, Стоимость доставки: {order.DeliveryCost}");
 
-            createdOrders.Add(order);
+                createdOrders.Add(order);
+            }
+
+            return createdOrders;
         }
-
-        return createdOrders;
     }
 }

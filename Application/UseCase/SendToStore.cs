@@ -1,6 +1,6 @@
-﻿using Domain.Сontracts;
+﻿using Application.Сontracts;
 
-namespace Domain.UseCase
+namespace Application.UseCase
 {
     public class SendToStoreUseCase
     {

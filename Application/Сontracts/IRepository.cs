@@ -1,4 +1,4 @@
-﻿namespace Domain.Сontracts
+﻿namespace Application.Сontracts
 {
     public interface IRepository<T> where T : class
     {

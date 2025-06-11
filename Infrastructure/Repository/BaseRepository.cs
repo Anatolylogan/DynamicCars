@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
-using Domain.Entities;
-using Domain.Сontracts;
+using Application.Entities;
+using Application.Сontracts;
 
 namespace Infrastructure.Repository
 {

@@ -1,4 +1,4 @@
-﻿namespace Domain.UseCase
+﻿namespace Application.UseCase
 {
     public class IdGenerator
     {

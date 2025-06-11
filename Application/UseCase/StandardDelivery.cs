@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.UseCase
+namespace Application.UseCase
 {
     public class StandardDelivery : IDeliveryOption
     {

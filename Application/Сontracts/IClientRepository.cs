@@ -1,6 +1,6 @@
-﻿using Domain.Entities;
+﻿using Application.Entities;
 
-namespace Domain.Сontracts
+namespace Application.Сontracts
 {
     public interface IClientRepository : IRepository<Client>
     {

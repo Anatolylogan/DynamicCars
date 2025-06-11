@@ -1,4 +1,4 @@
-﻿using Domain.UseCase;
+﻿using Application.UseCase;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 

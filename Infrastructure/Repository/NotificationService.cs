@@ -1,5 +1,5 @@
-﻿using Domain.Entities;
-using Domain.UseCase;
+﻿using Application.Entities;
+using Application.UseCase;
 
 public class NotificationService
 {

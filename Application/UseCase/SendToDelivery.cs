@@ -1,39 +1,36 @@
-﻿using Domain.Entities;
-using Domain.Сontracts;
+﻿using Application.Entities;
+using Application.Сontracts;
 
-namespace Domain.UseCase
+namespace Application.UseCase
 {
-    namespace Domain.UseCase
+    public class SendToDeliveryUseCase
     {
-        public class SendToDeliveryUseCase
+        private readonly IOrderRepository _orderRepository;
+        private readonly IDeliveryRepository _deliveryRepository;
+
+        public SendToDeliveryUseCase(IOrderRepository orderRepository, IDeliveryRepository deliveryRepository)
         {
-            private readonly IOrderRepository _orderRepository;
-            private readonly IDeliveryRepository _deliveryRepository;
+            _orderRepository = orderRepository;
+            _deliveryRepository = deliveryRepository;
+        }
 
-            public SendToDeliveryUseCase(IOrderRepository orderRepository, IDeliveryRepository deliveryRepository)
+        public void Execute(int orderId, string address)
+        {
+            var order = _orderRepository.GetById(orderId);
+            if (order == null)
             {
-                _orderRepository = orderRepository;
-                _deliveryRepository = deliveryRepository;
+                throw new Exception("Заказ не найден");
             }
-
-            public void Execute(int orderId, string address)
+            var delivery = new Delivery
             {
-                var order = _orderRepository.GetById(orderId);
-                if (order == null)
-                {
-                    throw new Exception("Заказ не найден");
-                }
-                var delivery = new Delivery
-                {
-                    OrderId = order.Id, 
-                    Address = address
-                };
-                _deliveryRepository.Add(delivery);
-                order.Status = OrderStatus.OnDelivery;
-                _orderRepository.Update(order);
+                OrderId = order.Id,
+                Address = address
+            };
+            _deliveryRepository.Add(delivery);
+            order.Status = OrderStatus.OnDelivery;
+            _orderRepository.Update(order);
 
-                Console.WriteLine($"Заказ с ID {order.Id} отправлен на доставку.");
-            }
+            Console.WriteLine($"Заказ с ID {order.Id} отправлен на доставку.");
         }
     }
 }

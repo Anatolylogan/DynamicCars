@@ -1,8 +1,8 @@
 ﻿using System.Net;
-using Domain.Entities;
-using Domain.Сontracts;
+using Application.Entities;
+using Application.Сontracts;
 
-namespace Domain.UseCase
+namespace Application.UseCase
 {
     public class RegisterClientUseCase
     {

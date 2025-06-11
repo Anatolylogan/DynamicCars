@@ -1,6 +1,6 @@
-﻿using Domain.UseCase;
+﻿using Application.UseCase;
 
-namespace Domain.Entities
+namespace Application.Entities
 {
     public class Order : Entity
     {

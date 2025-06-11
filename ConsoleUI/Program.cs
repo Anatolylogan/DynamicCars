@@ -1,8 +1,7 @@
 ﻿using Infrastructure.Repository;
-using Domain.UseCase;
-using Domain.UseCase.Domain.UseCase;
+using Application.UseCase;
 
-namespace ConsoleApp
+namespace ConsoleUI
 {
     class Program
     {

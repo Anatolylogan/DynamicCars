@@ -1,8 +1,8 @@
-﻿using Domain.Entities;
-using Domain.Сontracts;
+﻿using Application.Entities;
+using Application.Сontracts;
 using System;
 
-namespace Domain.UseCase
+namespace Application.UseCase
 {
     public class CancelOrderUseCase
     {

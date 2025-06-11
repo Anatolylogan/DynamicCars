@@ -1,8 +1,10 @@
-﻿using Domain.UseCase;
+﻿using Application.UseCase;
+using Application.Сontracts;
 using DynamicCarsNew.Infrastructure;
 using DynamicCarsNew.Models.Requests;
+using Infrastructure.Repository;
 using Microsoft.AspNetCore.Mvc;
-using WebDynamicCars.Models.Requests;
+using WebUI.Models.Requests;
 
 namespace WebDynamicCars.Controllers
 {
@@ -13,15 +15,24 @@ namespace WebDynamicCars.Controllers
         private readonly CreateOrderUseCase _createOrderUseCase;
         private readonly CancelOrderUseCase _cancelOrderUseCase;
         private readonly FilterOrdersByStatusUseCase _filterOrdersByStatusUseCase;
+        private readonly CompleteMakingUseCase _completeMakingUseCase;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IClientRepository _clientRepository;
 
         public OrderController(
             CreateOrderUseCase createOrderUseCase,
             CancelOrderUseCase cancelOrderUseCase,
-            FilterOrdersByStatusUseCase filterOrdersByStatusUseCase)
+            FilterOrdersByStatusUseCase filterOrdersByStatusUseCase,
+            CompleteMakingUseCase completeMakingUseCase,
+            IOrderRepository orderRepository,
+            IClientRepository clientRepository)
         {
             _createOrderUseCase = createOrderUseCase;
             _cancelOrderUseCase = cancelOrderUseCase;
             _filterOrdersByStatusUseCase = filterOrdersByStatusUseCase;
+            _completeMakingUseCase = completeMakingUseCase;
+            _orderRepository = orderRepository;
+            _clientRepository = clientRepository;
         }
 
         [HttpPost("create")]
@@ -73,11 +84,59 @@ namespace WebDynamicCars.Controllers
                 return Conflict(new { error = ex.Message });
             }
         }
-        [HttpGet("order/statuses")]
-        public IActionResult GetOrderStatuses()
+        [HttpPost("orders/by/status")]
+        public IActionResult GetOrdersByStatus([FromBody] FilterOrdersRequest request)
         {
-            var statuses = Enum.GetNames(typeof(OrderStatus));
-            return Ok(statuses);
+            if (!Enum.IsDefined(typeof(OrderStatus), request.Status))
+            {
+                return BadRequest(new { error = "Недопустимый статус заказа." });
+            }
+
+            var orders = _filterOrdersByStatusUseCase.Execute(request.Status);
+            return Ok(orders);
+        }
+        [HttpPost("complete/order")]
+        public IActionResult CompleteOrder([FromBody] CompleteOrderRequest request)
+        {
+            if (request.OrderId <= 0 || string.IsNullOrWhiteSpace(request.ClientEmail))
+                return BadRequest("Некорректные данные для завершения заказа.");
+
+            try
+            {
+                _completeMakingUseCase.Execute(request.OrderId, request.ClientEmail);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+        [HttpGet("orders")]
+        public IActionResult GetOrders()
+        {
+            var orders = _orderRepository.GetAll();
+
+            if (!orders.Any())
+                return NotFound("Список заказов пуст.");
+
+            var result = orders.Select(order =>
+            {
+                var client = _clientRepository.GetById(order.ClientId);
+                return new OrderResponse
+                {
+                    OrderId = order.Id,
+                    ClientId = order.ClientId,
+                    ClientName = client?.Name ?? "Неизвестный клиент",
+                    ClientPhone = client?.PhoneNumber ?? "Неизвестный номер телефона",
+                    CarBrand = order.Items.FirstOrDefault()?.CarBrand ?? "Не задан",
+                    CarpetColor = order.Items.FirstOrDefault()?.CarpetColor ?? "Не задан",
+                    DeliveryDetails = order.DeliveryDetails,
+                    DeliveryCost = order.DeliveryCost,
+                    Status = order.Status.ToString()
+                };
+            }).ToList();
+
+            return Ok(result);
         }
     }
 }

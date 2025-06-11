@@ -1,6 +1,5 @@
-﻿using Domain.Entities;
-using Domain.Сontracts;
-using Infrastructure.Configuration;
+﻿using Application.Entities;
+using Application.Сontracts;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Repository

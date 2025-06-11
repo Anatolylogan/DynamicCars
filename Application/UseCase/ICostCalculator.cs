@@ -1,6 +1,6 @@
-﻿using Domain.Entities;
+﻿using Application.Entities;
 
-namespace Domain.UseCase
+namespace Application.UseCase
 {
     public interface ICostCalculator
     {
